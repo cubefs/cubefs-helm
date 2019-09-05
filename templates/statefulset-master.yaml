@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "chubaofs-helm.master.fullname" . }}
+  labels:
+    app: {{ include "chubaofs-helm.name" . }}
+    chart: {{ include "chubaofs-helm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: master
+spec:
+  replicas: {{ .Values.master.replicas }}
+  serviceName: {{ include "chubaofs-helm.master.fullname" . }}
+  selector:
+    matchLabels:
+      app: {{ include "chubaofs-helm.name" . }}
+      release: {{ .Release.Name }}
+      role: master
+  template:
+    metadata:
+      labels:
+        app: {{ include "chubaofs-helm.name" . }}
+        release: {{ .Release.Name }}
+        role: master
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "/cfs/script/start.sh" ]
+          {{/*command: [ "/bin/bash", "-c", "--" ]*/}}
+          {{/*args: [ "while true; do sleep 30; done;" ]*/}}
+          env:
+          - name: CBFS_CLUSTER_NAME
+            value: {{ .Values.master.clusterName | quote}}
+          - name: CBFS_ROLE
+            value: "master"
+          - name: CBFS_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: CBFS_PORT
+            value: "17010"
+          - name: CBFS_PROF
+            value: "17020"
+          - name: CBFS_PEERS
+            value: "{{ range $i, $e := until (.Values.master.replicas | int) }}{{ if ne $i 0 }},{{ end }}{{ $i | add1 }}:{{ include "chubaofs-helm.fullname" $ }}-master-{{ $i }}.{{ include "chubaofs-helm.fullname" $ }}:17010{{ end }}"
+          - name: CBFS_RETAIN_LOGS
+            value: {{ .Values.master.retainLogs | quote}}
+          - name: CBFS_LOGDIR
+            value: {{ .Values.master.logDir | quote}}
+          - name: CBFS_LOG_LEVEL
+            value: {{ .Values.master.logLevel | quote}}
+          - name: CBFS_WAL_DIR
+            value: {{ .Values.master.walDir | quote}}
+          - name: CBFS_STORE_DIR
+            value: {{ .Values.master.storeDir | quote}}
+          ports:
+          {{- range $key, $port := .Values.master.ports }}
+          - name: {{ $port.name }}
+            containerPort: {{ $port.containerPort }}
+            protocol: {{ $port.protocol }}
+          {{- end }}
+          volumeMounts:
+            - name: script-volume
+              mountPath: /cfs/script/
+              readOnly: false
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: script-volume
+        configMap:
+          defaultMode: 0755
+          name: {{ include "chubaofs-helm.master.fullname" . }}

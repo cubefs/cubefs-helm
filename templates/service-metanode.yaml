@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chubaofs-helm.metanode.fullname" . }}
+  labels:
+    app: {{ include "chubaofs-helm.name" . }}
+    chart: {{ include "chubaofs-helm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: metanode
+spec:
+  clusterIP: None
+  ports:
+{{- range $key, $port := .Values.metanode.ports }}
+    - name: {{ $port.name }}
+      port: {{ $port.containerPort }}
+      targetPort: {{ $port.name }}
+      protocol: {{ $port.protocol }}
+{{- end }}
+  selector:
+    app: {{ include "chubaofs-helm.name" . }}
+    release: {{ .Release.Name }}
+    role: metanode

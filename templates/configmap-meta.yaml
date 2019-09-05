@@ -1,0 +1,65 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "chubaofs-helm.metanode.fullname" . }}
+  labels:
+    app: {{ include "chubaofs-helm.name" . }}
+    chart: {{ include "chubaofs-helm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role:  metanode
+data:
+  metanode.sh: |
+    #!/bin/sh
+
+    CBFS_ROLE=${CBFS_ROLE:="metanode"}
+    CBFS_LISTEN=${CBFS_LISTEN:="17210"}
+    CBFS_PROF=${CBFS_PROF:="17220"}
+    CBFS_RAFT_HEARTBEAT_PORT=${CBFS_RAFT_HEARTBEAT_PORT:="17230"}
+    CBFS_RAFT_REPLICA_PORT=${CBFS_RAFT_REPLICA_PORT:="17240"}
+    CBFS_LOG_LEVEL=${CBFS_LOG_LEVEL:="info"}
+    CBFS_LOG_DIR=${CBFS_LOG_DIR:="/cfs/log"}
+    CBFS_WARN_LOG_DIR=${CBFS_WARN_LOG_DIR:="info"}
+    CBFS_METADATA_DIR=${CBFS_METADATA_DIR:="/cfs/data/meta"}
+    CBFS_RAFT_DIR=${CBFS_RAFT_DIR:="/cfs/data/raft"}
+    CBFS_MASTER_ADDRS=${CBFS_MASTER_ADDRS:=""}
+    jq -n \
+        --arg role "$CBFS_ROLE" \
+        --arg listen "$CBFS_LISTEN" \
+        --arg prof "$CBFS_PROF" \
+        --arg raftHeartbeatPort "$CBFS_RAFT_HEARTBEAT_PORT" \
+        --arg raftReplicaPort "$CBFS_RAFT_REPLICA_PORT" \
+        --arg logLevel "$CBFS_LOG_LEVEL" \
+        --arg logDir "$CBFS_LOG_DIR" \
+        --arg warnLogDir "$CBFS_WARN_LOG_DIR" \
+        --arg metadataDir "$CBFS_METADATA_DIR" \
+        --arg raftDir "$CBFS_RAFT_DIR" \
+        --arg masterAddrs "$CBFS_MASTER_ADDRS" \
+          '{
+            "role": $role,
+            "listen": $listen,
+            "prof": $prof,
+            "raftHeartbeatPort": $raftHeartbeatPort,
+            "raftReplicaPort": $raftReplicaPort,
+            "logLevel": $logLevel,
+            "logDir": $logDir,
+            "warnLogDir": $warnLogDir,
+            "metadataDir": $metadataDir,
+            "raftDir": $raftDir,
+            "masterAddrs": [
+              $masterAddrs
+            ]
+          }' | jq '.masterAddrs[0] |= split(",")' > /cfs/conf/metanode.json
+
+  start.sh: |
+    #!/bin/sh
+
+    mkdir -p /cfs/log /cfs/data/wal /cfs/data/store /cfs/bin /cfs/conf
+    touch /cfs/conf/metanode.json
+
+    echo "generate metanode.json"
+    /bin/bash /cfs/script/metanode.sh
+
+
+    echo "start metanode"
+    /cfs/bin/cfs-server -c /cfs/conf/metanode.json

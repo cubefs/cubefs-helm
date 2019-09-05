@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "chubaofs-helm.metanode.fullname" . }}
+  labels:
+    app: {{ include "chubaofs-helm.name" . }}
+    chart: {{ include "chubaofs-helm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: metanode
+spec:
+  replicas: {{ .Values.metanode.replicas }}
+  serviceName: {{ include "chubaofs-helm.metanode.fullname" . }}
+  selector:
+    matchLabels:
+      app: {{ include "chubaofs-helm.name" . }}
+      release: {{ .Release.Name }}
+      role: metanode
+  template:
+    metadata:
+      labels:
+        app: {{ include "chubaofs-helm.name" . }}
+        release: {{ .Release.Name }}
+        role: metanode
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "/cfs/script/start.sh" ]
+          env:
+          - name: CBFS_ROLE
+            value: "metanode"
+          - name: CBFS_LISTEN
+            value: {{ .Values.metanode.listen | quote}}
+          - name: CBFS_PROF
+            value: {{ .Values.metanode.prof | quote}}
+          - name: CBFS_RAFT_HEARTBEAT_PORT
+            value: {{ .Values.metanode.raftHeartbeatPort | quote}}
+          - name: CBFS_RAFT_REPLICA_PORT
+            value: {{ .Values.metanode.raftReplicaPort | quote}}
+          - name: CBFS_LOG_LEVEL
+            value: {{ .Values.metanode.logLevel | quote}}
+          - name: CBFS_LOG_DIR
+            value: {{ .Values.metanode.logDir | quote}}
+          - name: CBFS_WARN_LOG_DIR
+            value: {{ .Values.metanode.warnLogDir | quote}}
+          - name: CBFS_METADATA_DIR
+            value: {{ .Values.metanode.metadataDir | quote}}
+          - name: CBFS_RAFT_DIR
+            value: {{ .Values.metanode.raftDir | quote}}
+          - name: CBFS_MASTER_ADDRS
+            value: '{{ range $i, $e := until (.Values.master.replicas | int) }}"{{ if ne $i 0 }},{{ end }}{{ include "chubaofs-helm.master.fullname" $ }}-{{ $i }}.{{ include "chubaofs-helm.master.fullname" $ }}:17010"{{ end }}'
+          ports:
+          {{- range $key, $port := .Values.metanode.ports }}
+          - name: {{ $port.name }}
+            containerPort: {{ $port.containerPort }}
+            protocol: {{ $port.protocol }}
+          {{- end }}
+          volumeMounts:
+            - name: script-volume
+              mountPath: /cfs/script/
+              readOnly: false
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: script-volume
+        configMap:
+          defaultMode: 0755
+          name: {{ include "chubaofs-helm.metanode.fullname" . }}

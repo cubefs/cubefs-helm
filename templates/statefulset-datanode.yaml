@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "chubaofs-helm.datanode.fullname" . }}
+  labels:
+    app: {{ include "chubaofs-helm.name" . }}
+    chart: {{ include "chubaofs-helm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: datanode
+spec:
+  replicas: {{ .Values.datanode.replicas }}
+  serviceName: {{ include "chubaofs-helm.datanode.fullname" . }}
+  selector:
+    matchLabels:
+      app: {{ include "chubaofs-helm.name" . }}
+      release: {{ .Release.Name }}
+      role: datanode
+  template:
+    metadata:
+      labels:
+        app: {{ include "chubaofs-helm.name" . }}
+        release: {{ .Release.Name }}
+        role: datanode
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "/cfs/script/start.sh" ]
+          {{/*command: [ "/bin/bash", "-c", "--" ]*/}}
+          {{/*args: [ "while true; do sleep 30; done;" ]*/}}
+          env:
+          - name: CBFS_ROLE
+            value: "datanode"
+          - name: CBFS_PORT
+            value: "17310"
+          - name: CBFS_PROF
+            value: "17320"
+          - name: CBFS_RAFT_HEARTBEAT_PORT
+            value: "17330"
+          - name: CBFS_RAFT_REPLICA_PORT
+            value: "17340"
+          - name: CBFS_PEERS
+            value: "{{ range $i, $e := until (.Values.master.replicas | int) }}{{ if ne $i 0 }},{{ end }}{{ $i | add1 }}:{{ include "chubaofs-helm.fullname" $ }}-master-{{ $i }}.{{ include "chubaofs-helm.fullname" $ }}:17010{{ end }}"
+          - name: CBFS_LOGDIR
+            value: {{ .Values.datanode.logDir | quote}}
+          - name: CBFS_WARN_LOG_DIR
+            value: {{ .Values.datanode.warnLogDir | quote}}
+          - name: CBFS_LOG_LEVEL
+            value: {{ .Values.datanode.logLevel | quote}}
+          - name: CBFS_MASTER_ADDRS
+            value: "{{ range $i, $e := until (.Values.master.replicas | int) }}{{ if ne $i 0 }},{{ end }}{{ include "chubaofs-helm.master.fullname" $ }}-{{ $i }}.{{ include "chubaofs-helm.master.fullname" $ }}:17010{{ end }}"
+          ports:
+          {{- range $key, $port := .Values.datanode.ports }}
+          - name: {{ $port.name }}
+            containerPort: {{ $port.containerPort }}
+            protocol: {{ $port.protocol }}
+          {{- end }}
+          volumeMounts:
+            - name: script-volume
+              mountPath: /cfs/script/
+              readOnly: false
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: script-volume
+        configMap:
+          defaultMode: 0755
+          name: {{ include "chubaofs-helm.datanode.fullname" . }}

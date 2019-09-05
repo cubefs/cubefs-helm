@@ -1,0 +1,66 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "chubaofs-helm.datanode.fullname" . }}
+  labels:
+    app: {{ include "chubaofs-helm.name" . }}
+    chart: {{ include "chubaofs-helm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role:  datanode
+data:
+  datanode.sh: |
+    #!/bin/sh
+
+    CBFS_ROLE=${CBFS_ROLE:="metanode"}
+    CBFS_PORT=${CBFS_PORT:="17310"}
+    CBFS_PROF=${CBFS_PROF:="17320"}
+    CBFS_RAFT_HEARTBEAT_PORT=${CBFS_RAFT_HEARTBEAT_PORT:="17330"}
+    CBFS_RAFT_REPLICA_PORT=${CBFS_RAFT_REPLICA_PORT:="17340"}
+    CBFS_LOG_DIR=${CBFS_LOG_DIR:="/cfs/log"}
+    CBFS_WARN_LOG_DIR=${CBFS_WARN_LOG_DIR:="info"}
+    CBFS_LOG_LEVEL=${CBFS_LOG_LEVEL:="info"}
+    CBFS_DISKS=${CBFS_DISKS:="/cfs/disk:10737418240"}
+    CBFS_MASTER_ADDRS=${CBFS_MASTER_ADDRS:=""}
+    SPLIT_MASTER_ADDS=($(echo "$CBFS_MASTER_ADDRS" | tr ',' '\n'))
+    jq -n \
+        --arg role "$CBFS_ROLE" \
+        --arg port "$CBFS_PORT" \
+        --arg prof "$CBFS_PROF" \
+        --arg raftHeartbeatPort "$CBFS_RAFT_HEARTBEAT_PORT" \
+        --arg raftReplicaPort "$CBFS_RAFT_REPLICA_PORT" \
+        --arg logDir "$CBFS_LOG_DIR" \
+        --arg warnLogDir "$CBFS_WARN_LOG_DIR" \
+        --arg logLevel "$CBFS_LOG_LEVEL" \
+        --arg disks "$CBFS_DISKS" \
+        --arg masterAddrs "$CBFS_MASTER_ADDRS" \
+          '{
+            "role": $role,
+            "port": $port,
+            "prof": $prof,
+            "raftHeartbeatPort": $raftHeartbeatPort,
+            "raftReplicaPort": $raftReplicaPort,
+            "rack": "rack-01",
+            "logDir": $logDir,
+            "warnLogDir": $warnLogDir,
+            "logLevel": $logLevel,
+            "disks": [
+              $disks
+            ],
+            "masterAddr": [
+              $masterAddrs
+            ]
+          }' | jq '.masterAddrs[0] |= split(",")' > /cfs/conf/datanode.json
+
+  start.sh: |
+    #!/bin/sh
+
+    mkdir -p /cfs/log /cfs/data/wal /cfs/data/store /cfs/bin /cfs/conf
+    touch /cfs/conf/datanode.json
+
+    echo "generate datanode.json"
+    /bin/bash /cfs/script/datanode.sh
+
+
+    echo "start datanode"
+    /cfs/bin/cfs-server -c /cfs/conf/datanode.json
