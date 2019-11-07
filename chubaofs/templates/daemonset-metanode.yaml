@@ -1,0 +1,121 @@
+{{- if .Values.component.metanode }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: metanode
+  labels:
+{{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    matchLabels:
+{{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 8 }}
+    spec:
+      nodeSelector:
+        {{ $.Values.metanode.labels.node_selector_key }}: {{ $.Values.metanode.labels.node_selector_value }}
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: {{ $.Values.pod.dns_policy }}
+      initContainers:
+        - name: init-config
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command:
+            - /tmp/config-metanode.sh
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: CBFS_METANODE_PORT
+              value: {{ .Values.metanode.port | quote }}
+            - name: CBFS_METANODE_PROF
+              value: {{ .Values.metanode.prof | quote }}
+            - name: CBFS_METANODE_LOG_LEVEL
+              value: {{ .Values.metanode.log_level | quote }}
+            - name: CBFS_METANODE_RAFT_HEARTBEAT_PORT
+              value: {{ .Values.metanode.raft_heartbeat | quote }}
+            - name: CBFS_METANODE_RAFT_REPLICA_PORT
+              value: {{ .Values.metanode.raft_replica | quote }}
+            - name: CBFS_METANODE_EXPORTER_PORT
+              value: {{ .Values.metanode.exporter_port | quote }}
+            - name: CBFS_MASTER_ADDRS
+              value: {{ include "chubaofs.master.master-service.address" . | quote }}
+            - name: CBFS_MASTER_TOTAL_MEM
+              value: {{ .Values.metanode.total_mem | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /tmp/config-metanode.sh
+              subPath: config-metanode.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /chubaofs/conf
+        - name: prepare-pod
+          image: busybox
+          command: ['sh', '-c', 'until nslookup $CBFS_MASTER_SERVICE; do echo waiting for $CBFS_MASTER_SERVICE; sleep 2; done;']
+          env:
+            - name: CBFS_MASTER_SERVICE
+              value: {{ include "chubaofs.master.master-service" . | quote }}
+      containers:
+        - name: metanode-pod
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "/chubaofs/bin/start.sh" ]
+          securityContext:
+            privileged: true
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+{{ tuple $envAll "port" .Values.metanode.port | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll "prof" .Values.metanode.prof | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll "raft-heartbeat" .Values.metanode.raft_heartbeat | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll "raft-replica" .Values.metanode.raft_replica | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll "exporter-port" .Values.metanode.exporter_port | include "helm-toolkit.utils.container_port" | indent 12 }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /chubaofs/bin/start.sh
+              subPath: start-metanode.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /chubaofs/conf
+            {{- if $.Values.path.log }}
+            - name: pod-log-path
+              mountPath: /chubaofs/logs
+              readOnly: false
+            {{- end }}
+            {{- if $.Values.path.data }}
+            - name: pod-data-path
+              mountPath: /chubaofs/data
+              readOnly: false
+            {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.metanode | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+      volumes:
+        - name: chubaofs-bin
+          configMap:
+            name: chubaofs-bin
+            defaultMode: 0555
+        - name: chubaofs-conf
+          emptyDir: {}
+        {{- if $.Values.path.log }}
+        - name: pod-log-path
+          hostPath:
+            path: {{ $.Values.path.log }}
+        {{- end }}
+        {{- if $.Values.path.data }}
+        - name: pod-data-path
+          hostPath:
+            path: {{ $.Values.path.data }}
+        {{- end }}
+{{ end }}
+
+
+
+
+
+
