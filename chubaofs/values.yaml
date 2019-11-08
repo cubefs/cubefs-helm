@@ -1,0 +1,108 @@
+
+namespace: chubaofs
+
+component:
+  master: true
+  datanode: true
+  metanode: true
+  client: true
+  provisioner: false
+
+image:
+  server: liuchengyu/cfs-server:1.3.0
+  client: liuchengyu/cfs-client:1.3.0
+  pull_policy: "IfNotPresent"
+
+# store data,log and other data 
+path:
+  data: /var/lib/chubaofs
+  log: /var/log/chubaofs
+
+master:
+  replicas: 3
+  cluster: my-cluster
+  labels:
+    node_selector_key: chuabaofs-master
+    node_selector_value: enabled
+  log_level: info
+  retain_logs: 2000
+  port: 8080
+  prof: 10088
+  exporter_port: 9510
+
+metanode:
+  labels:
+    node_selector_key: chuabaofs-metanode
+    node_selector_value: enabled
+  log_level: info
+  total_mem: "2147483648"
+  port: 9021
+  prof: 9092
+  raft_heartbeat: 9093
+  raft_replica: 9094
+  exporter_port: 9511
+
+datanode:
+  labels:
+    node_selector_key: chuabaofs-datanode
+    node_selector_value: enabled
+  log_level: info
+  port: 6000
+  prof: 6001
+  raft_heartbeat: 9095
+  raft_replica: 9096
+  exporter_port: 9512
+  disks:
+    - device: /dev/sda
+      retain_space: "21474836480"
+    - device: /dev/sdb
+      retain_space: "21474836480"
+    - device: /dev/sdc
+      retain_space: "21474836480"
+
+client:
+  replicas: 1
+  vol_name: "test"
+  owner: "chubaofs"
+  log_level: info
+  exporter_port: 9513
+  prof: 10094
+
+
+pod:
+  dns_policy: "ClusterFirstWithHostNet"
+  resources:
+    enabled: false
+    master:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1024Mi"
+        cpu: "1000m"
+    datanode:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1024Mi"
+        cpu: "1000m"
+    metanode:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1024Mi"
+        cpu: "1000m"
+    client:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1024Mi"
+        cpu: "1000m"
+
+storageclass:
+  provisioner: chubao.io/chubaofs
+  name: chubaofs
+

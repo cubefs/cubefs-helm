@@ -1,0 +1,124 @@
+{{- if .Values.component.client }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  labels:
+{{ tuple $envAll $namespace "client" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ .Values.client.replicas }}
+  selector:
+    matchLabels:
+{{ tuple $envAll $namespace "client" | include "helm-toolkit.metadata_labels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $namespace "client" | include "helm-toolkit.metadata_labels" | indent 8 }}
+    spec:
+      initContainers:
+        - name: init-config
+          image: {{ $.Values.image.client }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command:
+            - /tmp/config-client.sh
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: CBFS_CLIENT_PROF
+              value: {{ .Values.client.prof | quote }}
+            - name: CBFS_CLIENT_LOG_LEVEL
+              value: {{ .Values.client.log_level | quote }}
+            - name: CBFS_MASTER_ADDRS
+              value: {{ include "chubaofs.master.master-service.address" . | quote }}
+            - name: CBFS_CLIENT_VOL_NAME
+              value: {{ .Values.client.vol_name | quote }}
+            - name: CBFS_CLIENT_OWNER
+              value: {{ .Values.client.owner | quote }}
+            - name: CBFS_CLIENT_EXPORTER_PORT
+              value: {{ .Values.client.exporter_port | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /tmp/config-client.sh
+              subPath: config-client.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /chubaofs/conf
+        - name: prepare-pod
+          image: {{ $.Values.image.client }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command:
+            - /tmp/check-volumn.sh
+          securityContext:
+            privileged: true
+          env:
+            - name: CBFS_CLIENT_VOL_NAME
+              value: {{ .Values.client.vol_name | quote }}
+            - name: CBFS_CLIENT_OWNER
+              value: {{ .Values.client.owner | quote }}
+            - name: CBFS_MASTER_SERVICE
+              value: {{ include "chubaofs.master.master-service" . | quote }}
+            - name: CBFS_MASTER_PORT
+              value: {{ .Values.master.port | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /tmp/check-volumn.sh
+              subPath: check-volumn.sh
+              readOnly: true
+      containers:
+        - name: client-pod
+          image: {{ $.Values.image.client }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "/chubaofs/bin/start.sh" ]
+          securityContext:
+            privileged: true
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+{{ tuple $envAll "prof" .Values.client.prof | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll "exporter-port" .Values.client.exporter_port | include "helm-toolkit.utils.container_port" | indent 12 }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /chubaofs/bin/start.sh
+              subPath: start-client.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /chubaofs/conf
+            {{- if $.Values.path.log }}
+            - name: pod-log-path
+              mountPath: /chubaofs/logs
+              readOnly: false
+            {{- end }}
+            {{- if $.Values.path.data }}
+            - name: pod-data-path
+              mountPath: /chubaofs/data
+              readOnly: false
+            {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.client | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+      volumes:
+        - name: chubaofs-bin
+          configMap:
+            name: chubaofs-bin
+            defaultMode: 0555
+        - name: chubaofs-conf
+          emptyDir: {}
+        {{- if $.Values.path.log }}
+        - name: pod-log-path
+          hostPath:
+            path: {{ $.Values.path.log }}
+        {{- end }}
+        {{- if $.Values.path.data }}
+        - name: pod-data-path
+          hostPath:
+            path: {{ $.Values.path.data }}
+        {{- end }}
+{{ end }}
+
+
+
+
+
