@@ -71,3 +71,15 @@ The output of `helm install` shows servers to be deployed, and use the following
 ```
 $ kubectl -n chubaofs get pods
 ```
+
+Check cluster status
+
+```
+helm status chubaofs
+```
+
+Delete cluster
+
+```
+helm delete --purge chubaofs
+```
