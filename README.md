@@ -63,7 +63,7 @@ kubectl label node <nodename> chuabaofs-datanode=enabled
 ### Deploy ChubaoFS cluster
 
 ```
-$ helm install --name=chubaofs local/chubaofs --namespace=chubaofs -f ~/chubaofs.yaml
+$ helm install --name=chubaofs local/chubaofs -f ~/chubaofs.yaml
 ```
 
 The output of `helm install` shows servers to be deployed, and use the following command to check pod status, which may take a few minutes.
