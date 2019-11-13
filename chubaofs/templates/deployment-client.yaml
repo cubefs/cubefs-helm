@@ -40,6 +40,8 @@ spec:
               value: {{ .Values.client.owner | quote }}
             - name: CBFS_CLIENT_EXPORTER_PORT
               value: {{ .Values.client.exporter_port | quote }}
+            - name: CBFS_CONSUL_ADDR
+              value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
           volumeMounts:
             - name: chubaofs-bin
               mountPath: /tmp/config-client.sh
@@ -98,7 +100,7 @@ spec:
               mountPath: /chubaofs/data
               readOnly: false
             {{- end }}
-{{ tuple $envAll $envAll.Values.pod.resources.client | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ tuple $envAll $envAll.Values.client.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
         - name: chubaofs-bin
           configMap:

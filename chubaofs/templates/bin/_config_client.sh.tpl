@@ -12,6 +12,7 @@ jq -n \
   --arg masterAddr "$CBFS_MASTER_ADDRS" \
   --arg exporterPort "$CBFS_CLIENT_EXPORTER_PORT" \
   --arg prof "$CBFS_CLIENT_PROF" \
+  --arg consulAddr "$CBFS_CONSUL_ADDR" \
   '{
   "mountPoint": "/mnt/chubaofs",
   "volName": $volName,
@@ -19,6 +20,7 @@ jq -n \
   "masterAddr": $masterAddr,
   "logDir": "/chubaofs/logs",
   "logLevel": $logLevel,
+  "consulAddr": $consulAddr,
   "exporterPort": $exporterPort,
   "profPort": $prof
 }' > /chubaofs/conf/fuse.json

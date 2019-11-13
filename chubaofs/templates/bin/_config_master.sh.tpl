@@ -20,6 +20,7 @@ jq -n \
   --arg retainLogs "$CBFS_MASTER_RETAIN_LOGS" \
   --arg exporterPort "$CBFS_MASTER_EXPORTER_PORT" \
   --arg logLevel "$CBFS_MASTER_LOG_LEVEL" \
+  --arg consulAddr "$CBFS_CONSUL_ADDR" \
   '{
     "role": "master",
     "ip": $ip,
@@ -32,6 +33,7 @@ jq -n \
     "logLevel": $logLevel,
     "walDir": "/chubaofs/data/master/raft",
     "storeDir": "/chubaofs/data/master/rocksdbstore",
+    "consulAddr": $consulAddr,
     "exporterPort": $exporterPort,
     "clusterName": $clusterName
 }' > /chubaofs/conf/master.json

@@ -1,0 +1,84 @@
+{{- if .Values.component.monitor }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  labels:
+{{ tuple $envAll $namespace "grafana" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ .Values.grafana.replicas }}
+  serviceName: grafana-service
+  selector:
+    matchLabels:
+{{ tuple $envAll $namespace "grafana" | include "helm-toolkit.metadata_labels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $namespace "grafana" | include "helm-toolkit.metadata_labels" | indent 8 }}
+    spec:
+      containers:
+        - name: grafana-pod
+          image: {{ $.Values.image.grafana }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          env:
+            # The following env variables set up basic auth twith the default admin user and admin password.
+            - name: GF_AUTH_BASIC_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "false"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "123456"
+            # - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+            #   value: Admin
+            # does not really work, because of template variables in exported dashboards:
+            # - name: GF_DASHBOARDS_JSON_ENABLED
+            #   value: "true"
+            # - name: GF_SECURITY_ADMIN_PASSWORD__FILE
+            #   value: ""
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 3000
+            # initialDelaySeconds: 30
+            # timeoutSeconds: 1
+          ports:
+{{ tuple $envAll "exporter-port" .Values.client.exporter_port | include "helm-toolkit.utils.container_port" | indent 12 }}
+          volumeMounts:
+            - name: grafana-persistent-storage
+              mountPath: /var/lib/grafana
+            - name: monitor-config
+              mountPath: /grafana/init.sh
+              subPath: init.sh
+            - name: monitor-config
+              mountPath: /etc/grafana/grafana.ini
+              subPath: grafana.ini
+            - name: monitor-config
+              mountPath: /etc/grafana/provisioning/dashboards/chubaofs.json
+              subPath: chubaofs.json
+            - name: monitor-config
+              mountPath: /etc/grafana/provisioning/dashboards/dashboard.yml
+              subPath: dashboard.yml
+            - name: monitor-config
+              mountPath: /etc/grafana/provisioning/datasources/datasource.yml
+              subPath: datasource.yml
+{{ tuple $envAll $envAll.Values.grafana.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+      volumes:
+        - name: monitor-config
+          configMap:
+            name: monitor-config
+            defaultMode: 0555
+        - name: grafana-persistent-storage
+          emptyDir: {}
+        # - name: grafana-security-admin-password
+        #   secret:
+        #     secretName: monitor-secret
+{{ end }}
+
+
+

@@ -1,0 +1,36 @@
+{{- if .Values.component.monitor }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consul
+  labels:
+{{ tuple $envAll $namespace "consul" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ .Values.consul.replicas }}
+  serviceName: consul-service
+  selector:
+    matchLabels:
+{{ tuple $envAll $namespace "consul" | include "helm-toolkit.metadata_labels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $namespace "consul" | include "helm-toolkit.metadata_labels" | indent 8 }}
+    spec:
+      containers:
+        - name: consul-pod
+          image: {{ $.Values.image.consul }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+{{ tuple $envAll "port" .Values.consul.port | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll $envAll.Values.consul.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ end }}
+

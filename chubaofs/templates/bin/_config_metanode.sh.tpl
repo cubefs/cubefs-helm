@@ -15,6 +15,7 @@ jq -n \
   --arg exporterPort "$CBFS_METANODE_EXPORTER_PORT" \
   --arg masterAddrs "$CBFS_MASTER_ADDRS" \
   --arg totalMem "$CBFS_MASTER_TOTAL_MEM" \
+  --arg consulAddr "$CBFS_CONSUL_ADDR" \
     '{
      "role": "metanode",
      "listen": $port,
@@ -25,6 +26,7 @@ jq -n \
      "raftDir": "/chubaofs/data/metanode/raft",
      "raftHeartbeatPort": $raftHeartbeatPort,
      "raftReplicaPort": $raftReplicaPort,
+     "consulAddr": $consulAddr,
      "exporterPort": $exporterPort,
      "totalMem": $totalMem,
      "masterAddrs": $masterAddrs
