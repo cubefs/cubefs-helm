@@ -22,7 +22,7 @@ spec:
         {{ $.Values.datanode.labels.node_selector_key }}: {{ $.Values.datanode.labels.node_selector_value }}
       hostNetwork: true
       hostPID: true
-      dnsPolicy: {{ $.Values.pod.dns_policy }}
+      dnsPolicy: ClusterFirstWithHostNet
       initContainers:
         - name: init-config
           image: {{ $.Values.image.server }}
@@ -50,6 +50,8 @@ spec:
               value: {{ .Values.datanode.exporter_port | quote }}
             - name: CBFS_DATANODE_DISKS
               value: {{ include "chubaofs.datanode.disks" . | quote }}
+            - name: CBFS_CONSUL_ADDR
+              value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
           volumeMounts:
             - name: chubaofs-bin
               mountPath: /tmp/config-datanode.sh
@@ -98,7 +100,7 @@ spec:
               mountPath: /chubaofs/data
               readOnly: false
             {{- end }}
-{{ tuple $envAll $envAll.Values.pod.resources.datanode | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ tuple $envAll $envAll.Values.datanode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
         - name: chubaofs-bin
           configMap:

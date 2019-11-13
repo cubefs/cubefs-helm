@@ -44,6 +44,7 @@ jq -n \
   --arg raftReplica "$CBFS_DATANODE_RAFT_REPLICA_PORT" \
   --arg masterAddr "$CBFS_MASTER_ADDRS" \
   --arg exporterPort "$CBFS_DATANODE_EXPORTER_PORT" \
+  --arg consulAddr "$CBFS_CONSUL_ADDR" \
   --arg disks "$DISK_DIR" \
   '{
     "role": "datanode",
@@ -54,7 +55,7 @@ jq -n \
     "raftHeartbeat": $raftHeartbeat,
     "raftReplica": $raftReplica,
     "raftDir": "/chubaofs/data/datanode/raft",
-    "consulAddr": "http://consul.prometheus-cfs.local",
+    "consulAddr": $consulAddr,
     "exporterPort": $exporterPort,
     "masterAddr": $masterAddr,
     "disks": $disks

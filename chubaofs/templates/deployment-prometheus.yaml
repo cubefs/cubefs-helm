@@ -1,0 +1,52 @@
+{{- if .Values.component.monitor }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  labels:
+{{ tuple $envAll $namespace "prometheus" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ .Values.prometheus.replicas }}
+  serviceName: prometheus-service
+  selector:
+    matchLabels:
+{{ tuple $envAll $namespace "prometheus" | include "helm-toolkit.metadata_labels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $namespace "prometheus" | include "helm-toolkit.metadata_labels" | indent 8 }}
+    spec:
+      containers:
+        - name: prometheus-pod
+          image: {{ $.Values.image.prometheus }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+{{ tuple $envAll "port" .Values.prometheus.port | include "helm-toolkit.utils.container_port" | indent 12 }}
+          volumeMounts:
+            - name: monitor-config
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
+            - name: prometheus-data
+              mountPath: /prometheus-data
+{{ tuple $envAll $envAll.Values.prometheus.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+      volumes:
+        - name: monitor-config
+          configMap:
+            name: monitor-config
+            defaultMode: 0555
+        - name: prometheus-data
+          hostPath:
+            path: {{ $.Values.path.monitor }}
+{{ end }}
+
+
+
+
+

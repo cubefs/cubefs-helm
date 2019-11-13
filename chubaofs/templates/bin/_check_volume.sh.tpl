@@ -2,7 +2,7 @@
 
 set -ex
 VOL_STAT_URL="http://$CBFS_MASTER_SERVICE:$CBFS_MASTER_PORT/client/volStat?name=$CBFS_CLIENT_VOL_NAME"
-CREATE_VOL_URL="http://$CBFS_MASTER_SERVICE:$CBFS_MASTER_PORT/admin/createVol?name=$CBFS_CLIENT_VOL_NAME&capacity=100&owner=$CBFS_CLIENT_OWNER&mpCount=3"
+CREATE_VOL_URL="http://$CBFS_MASTER_SERVICE:$CBFS_MASTER_PORT/admin/createVol?name=$CBFS_CLIENT_VOL_NAME&capacity=20&owner=$CBFS_CLIENT_OWNER&mpCount=3"
 SERVICE_NOT_UNAVAILABLE=99999
 VOL_NOT_EXIST=7
 VOL_EXIST=0
@@ -51,6 +51,7 @@ function start_check {
   fi
 }
 
+sleep 120
 until nslookup $CBFS_MASTER_SERVICE; do echo waiting for $CBFS_MASTER_SERVICE;sleep 2;done;
 start_check
 

@@ -1,0 +1,17 @@
+{{- if .Values.component.monitor }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: {{ $namespace }}
+spec:
+  ports:
+    - port: {{ .Values.prometheus.port }}
+      protocol: TCP
+      targetPort: {{ .Values.prometheus.port }}
+  selector:
+{{ tuple $envAll $namespace "prometheus" | include "helm-toolkit.metadata_labels" | indent 4 }}
+{{ end }}

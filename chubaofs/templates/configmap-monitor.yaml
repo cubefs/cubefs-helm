@@ -1,0 +1,28 @@
+{{- if .Values.component.monitor }}
+{{- $envAll := . }}
+{{- $consulURL := tuple $envAll | include "chubaofs.monitor.consul.url" }}
+{{- $consulAddress := tuple $envAll | include "chubaofs.monitor.consul.address" }}
+{{- $prometheusURL := tuple $envAll | include "chubaofs.monitor.prometheus.url" }}
+{{- $grafanaPassword := $envAll.Values.grafana.admin_password }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitor-config
+  namespace: {{ .Values.namespace }}
+data:
+  grafana.ini: |+
+{{ .Files.Get "config/grafana/grafana.ini" | indent 4 }}
+  init.sh: |+
+{{ .Files.Get "config/grafana/init.sh" | indent 4 }}
+  config.monitor: |+
+{{ .Files.Get "config/grafana/provisioning/config.monitor" | replace "GRAFANA_PASSWORD" $grafanaPassword | indent 4 }}
+  chubaofs.json: |+
+{{ .Files.Get "config/grafana/provisioning/dashboards/chubaofs.json" | indent 4 }}
+  dashboard.yml: |+
+{{ .Files.Get "config/grafana/provisioning/dashboards/dashboard.yml" | indent 4 }}
+  datasource.yml: |+
+{{ .Files.Get "config/grafana/provisioning/datasources/datasource.yml" | replace "PROMETHEUS_URL" $prometheusURL | indent 4 }}
+  prometheus.yml: |+
+{{ .Files.Get "config/prometheus/prometheus.yml" | replace "CONSUL_ADDRESS" $consulAddress | indent 4 }}
+{{- end }}

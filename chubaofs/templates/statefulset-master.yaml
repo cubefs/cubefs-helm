@@ -24,7 +24,7 @@ spec:
         {{ $.Values.master.labels.node_selector_key }}: {{ $.Values.master.labels.node_selector_value }}
       hostNetwork: true
       hostPID: true
-      dnsPolicy: {{ $.Values.pod.dns_policy }}
+      dnsPolicy: ClusterFirstWithHostNet
       initContainers:
         - name: init-config
           image: {{ $.Values.image.server }}
@@ -48,6 +48,8 @@ spec:
               value: {{ .Values.master.log_level | quote }}
             - name: CBFS_MASTER_EXPORTER_PORT
               value: {{ .Values.master.exporter_port | quote }}
+            - name: CBFS_CONSUL_ADDR
+              value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
             - name: POD_IP
               valueFrom:
                 fieldRef:
@@ -94,7 +96,7 @@ spec:
               mountPath: /chubaofs/data
               readOnly: false
             {{- end }}
-{{ tuple $envAll $envAll.Values.pod.resources.metanode | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ tuple $envAll $envAll.Values.metanode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
         - name: chubaofs-bin
           configMap:
