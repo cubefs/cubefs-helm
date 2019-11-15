@@ -48,7 +48,7 @@ spec:
               subPath: config-client.sh
               readOnly: true
             - name: chubaofs-conf
-              mountPath: /chubaofs/conf
+              mountPath: /cfs/conf
         - name: prepare-pod
           image: {{ $.Values.image.client }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
@@ -74,7 +74,7 @@ spec:
         - name: client-pod
           image: {{ $.Values.image.client }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "/bin/sh", "-c", "/chubaofs/bin/start.sh" ]
+          command: [ "/bin/sh", "-c", "/cfs/bin/start.sh" ]
           securityContext:
             privileged: true
           env:
@@ -85,19 +85,19 @@ spec:
 {{ tuple $envAll "exporter-port" .Values.client.exporter_port | include "helm-toolkit.utils.container_port" | indent 12 }}
           volumeMounts:
             - name: chubaofs-bin
-              mountPath: /chubaofs/bin/start.sh
+              mountPath: /cfs/bin/start.sh
               subPath: start-client.sh
               readOnly: true
             - name: chubaofs-conf
-              mountPath: /chubaofs/conf
+              mountPath: /cfs/conf
             {{- if $.Values.path.log }}
             - name: pod-log-path
-              mountPath: /chubaofs/logs
+              mountPath: /cfs/logs
               readOnly: false
             {{- end }}
             {{- if $.Values.path.data }}
             - name: pod-data-path
-              mountPath: /chubaofs/data
+              mountPath: /cfs/data
               readOnly: false
             {{- end }}
 {{ tuple $envAll $envAll.Values.client.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
