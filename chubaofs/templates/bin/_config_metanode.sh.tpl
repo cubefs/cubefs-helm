@@ -21,18 +21,18 @@ jq -n \
      "listen": $port,
      "prof": $prof,
      "logLevel": $logLevel,
-     "metadataDir": "/chubaofs/data",
-     "logDir": "/chubaofs/logs",
-     "raftDir": "/chubaofs/data/metanode/raft",
+     "metadataDir": "/cfs/data",
+     "logDir": "/cfs/logs",
+     "raftDir": "/cfs/data/metanode/raft",
      "raftHeartbeatPort": $raftHeartbeatPort,
      "raftReplicaPort": $raftReplicaPort,
      "consulAddr": $consulAddr,
      "exporterPort": $exporterPort,
      "totalMem": $totalMem,
      "masterAddrs": $masterAddrs
- }' | jq '.masterAddrs |= split(",")' > /chubaofs/conf/metanode.json
+ }' | jq '.masterAddrs |= split(",")' > /cfs/conf/metanode.json
 
-cat /chubaofs/conf/metanode.json
+cat /cfs/conf/metanode.json
 echo "after prepare config"
 
 

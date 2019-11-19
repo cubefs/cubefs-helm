@@ -2,8 +2,8 @@
 set -ex
 export LC_ALL=C
 
-mkdir -p /chubaofs/data/metanode/raft
+mkdir -p /cfs/data/metanode/raft
 
-cat /chubaofs/conf/metanode.json
+cat /cfs/conf/metanode.json
 echo "start master"
-/chubaofs/bin/cfs-server -f -c /chubaofs/conf/metanode.json
+/cfs/bin/cfs-server -f -c /cfs/conf/metanode.json

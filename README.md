@@ -45,6 +45,9 @@ datanode:
       retain_space: "21474836480"
     - device: /dev/sdb
       retain_space: "21474836480"
+      
+metanode:
+  total_mem: "2147483648"
 ```
 
 > Note that `chubaofs-helm/chubaofs/values.yaml` shows all the config parameters of ChubaoFS.

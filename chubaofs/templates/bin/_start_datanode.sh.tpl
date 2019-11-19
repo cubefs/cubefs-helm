@@ -2,7 +2,7 @@
 set -ex
 export LC_ALL=C
 
-mkdir -p /chubaofs/data/datanode/raft
+mkdir -p /cfs/data/datanode/raft
 
 n=0
 DISK_DIR=""
@@ -22,6 +22,6 @@ for i in ${arr[@]}; do
   n=$(($n+1))
 done
 
-cat /chubaofs/conf/datanode.json
+cat /cfs/conf/datanode.json
 echo "start master"
-/chubaofs/bin/cfs-server -f -c /chubaofs/conf/datanode.json
+/cfs/bin/cfs-server -f -c /cfs/conf/datanode.json

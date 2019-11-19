@@ -50,17 +50,17 @@ jq -n \
     "role": "datanode",
     "port": $port,
     "prof": $prof,
-    "logDir": "/chubaofs/logs",
+    "logDir": "/cfs/logs",
     "logLevel": $logLevel,
     "raftHeartbeat": $raftHeartbeat,
     "raftReplica": $raftReplica,
-    "raftDir": "/chubaofs/data/datanode/raft",
+    "raftDir": "/cfs/data/datanode/raft",
     "consulAddr": $consulAddr,
     "exporterPort": $exporterPort,
     "masterAddr": $masterAddr,
     "disks": $disks
-}' | jq '.masterAddr |= split(",")' | jq '.disks |= split(",")' > /chubaofs/conf/datanode.json
+}' | jq '.masterAddr |= split(",")' | jq '.disks |= split(",")' > /cfs/conf/datanode.json
 
-cat /chubaofs/conf/datanode.json
+cat /cfs/conf/datanode.json
 echo "after prepare config"
 

@@ -3,8 +3,8 @@
 set -ex
 export LC_ALL=C
 
-mkdir -p /mnt/chubaofs
+mkdir -p /cfs/mnt
 
-cat /chubaofs/conf/fuse.json
+cat /cfs/conf/fuse.json
 echo "start client"
-/chubaofs/bin/cfs-client -f -c /chubaofs/conf/fuse.json
+/cfs/bin/cfs-client -f -c /cfs/conf/fuse.json

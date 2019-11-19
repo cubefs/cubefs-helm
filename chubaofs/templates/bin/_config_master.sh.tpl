@@ -29,14 +29,14 @@ jq -n \
     "id": $id,
     "peers": $peers,
     "retainLogs": $retainLogs,
-    "logDir": "/chubaofs/logs",
+    "logDir": "/cfs/logs",
     "logLevel": $logLevel,
-    "walDir": "/chubaofs/data/master/raft",
-    "storeDir": "/chubaofs/data/master/rocksdbstore",
+    "walDir": "/cfs/data/master/raft",
+    "storeDir": "/cfs/data/master/rocksdbstore",
     "consulAddr": $consulAddr,
     "exporterPort": $exporterPort,
     "clusterName": $clusterName
-}' > /chubaofs/conf/master.json
+}' > /cfs/conf/master.json
 
-cat /chubaofs/conf/master.json
+cat /cfs/conf/master.json
 echo "after prepare config"

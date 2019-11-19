@@ -2,9 +2,9 @@
 set -ex
 export LC_ALL=C
 
-mkdir -p /chubaofs/data/master/raft
-mkdir -p /chubaofs/data/master/rocksdbstore
+mkdir -p /cfs/data/master/raft
+mkdir -p /cfs/data/master/rocksdbstore
 
-cat /chubaofs/conf/master.json
+cat /cfs/conf/master.json
 echo "start master"
-/chubaofs/bin/cfs-server -f -c /chubaofs/conf/master.json
+/cfs/bin/cfs-server -f -c /cfs/conf/master.json
