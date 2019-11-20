@@ -64,9 +64,12 @@ kubectl label node <nodename> chuabaofs-datanode=enabled
 ```
 
 ### Deploy ChubaoFS cluster
-
 ```
 $ helm install --name=chubaofs local/chubaofs -f ~/chubaofs.yaml
+```
+If you are using helm v3, execute the following command to install
+```
+$ helm install chubaofs ./chubaofs -f ~/chubaofs.yaml
 ```
 
 The output of `helm install` shows servers to be deployed.
@@ -102,6 +105,10 @@ Delete cluster
 
 ```
 helm delete --purge chubaofs
+```
+If you are using helm v3, execute the following command to delete
+```
+helm delete chubaofs
 ```
 
 ## Config Monitoring System (optional)
