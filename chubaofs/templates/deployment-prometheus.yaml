@@ -11,7 +11,6 @@ metadata:
   namespace: {{ $namespace }}
 spec:
   replicas: {{ .Values.prometheus.replicas }}
-  serviceName: prometheus-service
   selector:
     matchLabels:
 {{ tuple $envAll $namespace "prometheus" | include "helm-toolkit.metadata_labels" | indent 6 }}
