@@ -13,3 +13,6 @@ home: https://chubao.io
 sources:
   - https://github.com/chubaofs/chubaofs-helm
 icon: https://raw.githubusercontent.com/chubaofs/chubaofs-helm/master/assets/chubaofs-logo.png
+maintainers:
+- name: "Chengyu Liu"
+  email: chengyu_l@126.com
