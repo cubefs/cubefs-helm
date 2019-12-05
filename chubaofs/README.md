@@ -22,7 +22,7 @@ The configuration detail refer to [README.md](https://github.com/chubaofs/chubao
 After successful configuration, you can use this command to install the Chart into your kubernetes cluster
 
 ```
-$ helm install --name=chubaofs chubaofs/chubaofs-helm -f ~/chubaofs.yaml
+$ helm install --name=chubaofs chubaofs/chubaofs -f ~/chubaofs.yaml
 ```
 
 
