@@ -5,6 +5,10 @@
 
 The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubernetes.
 
+### Prerequisite 
+Kubernetes 1.16+
+Helm 2 (If you use hellm3, please read [this documentation](https://github.com/chubaofs/chubaofs-helm/blob/master/chubaofs/README.md))
+ 
 ### Init Helm
 
 ``` 
@@ -67,10 +71,6 @@ kubectl label node <nodename> chuabaofs-datanode=enabled
 ```
 $ helm install --name=chubaofs local/chubaofs -f ~/chubaofs.yaml
 ```
-If you are using helm v3, execute the following command to install
-```
-$ helm install chubaofs ./chubaofs -f ~/chubaofs.yaml
-```
 
 The output of `helm install` shows servers to be deployed.
 
@@ -105,10 +105,6 @@ Delete cluster
 
 ```
 helm delete --purge chubaofs
-```
-If you are using helm v3, execute the following command to delete
-```
-helm delete chubaofs
 ```
 
 ## Config Monitoring System (optional)
