@@ -3,12 +3,12 @@
 
 ## Introduction
 
-ChubaoFS is a distributed file system for cloud native applications. This chart deploy ChubaoFS on a Kubernetes cluster using Helm. It supports Helm v2 and Hell v3.
+ChubaoFS is a distributed file system for cloud native applications. This chart deploy ChubaoFS on a Kubernetes cluster using Helm. It supports Helm v2 and Helm v3.
 
 ## Prerequisite 
 
 - Kubernetes 1.16+
-- Helm 3 (If you use hellm2, please read [this documentation](https://github.com/chubaofs/chubaofs-helm/blob/master/README.md))
+- Helm 3 (If you use Helm v2, please read [this documentation](https://github.com/chubaofs/chubaofs-helm/blob/master/README.md))
 
 ## Add ChubaoFS Helm Chart repository
 
