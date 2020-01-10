@@ -41,7 +41,7 @@ http://prometheus-service.{{- $envAll.Values.namespace -}}.svc.cluster.local:{{-
 
 {{- define "chubaofs.datanode.disks" -}}
 {{- range $i, $e := .Values.datanode.disks -}}
-{{ if ne $i 0 }},{{ end }}{{- $e.device -}}:{{- $e.retain_space -}}
+{{ if ne $i 0 }},{{ end }}{{- $e.disk -}}
 {{- end -}}
 {{- end -}}
 
@@ -84,3 +84,25 @@ resources:
     memory: {{ $component.requests.memory | quote }}
 {{- end -}}
 {{- end -}}
+
+{{- define "helm-toolkit.utils.datanode.disks.volumes" -}}
+{{- $envAll := index . 0 -}}
+{{- $disk := index . 1 -}}
+{{- $diskAndQuotaArray := split ":" $disk -}}
+{{- if hasPrefix "/" $diskAndQuotaArray._0  -}}
+- name: {{ $diskAndQuotaArray._0 | replace "/" "" }}
+  hostPath:
+    path: {{ $diskAndQuotaArray._0 }}
+{{- end -}}
+{{- end -}}
+
+{{- define "helm-toolkit.utils.datanode.disks.volumes_mount" -}}
+{{- $envAll := index . 0 -}}
+{{- $disk := index . 1 -}}
+{{- $diskAndQuotaArray := split ":" $disk -}}
+{{- if hasPrefix "/" $diskAndQuotaArray._0  -}}
+- name: {{ $diskAndQuotaArray._0 | replace "/" "" }}
+  mountPath: {{ $diskAndQuotaArray._0 }}
+  readOnly: false
+{{- end }}
+{{- end }}
