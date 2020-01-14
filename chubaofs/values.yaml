@@ -10,8 +10,8 @@ component:
   monitor: true
 
 image:
-  server: chubaofs/cfs-server:1.4.0
-  client: chubaofs/cfs-client:1.4.0
+  server: chubaofs/cfs-server:1.5.0
+  client: chubaofs/cfs-client:1.5.0
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
@@ -34,6 +34,7 @@ master:
   port: 8080
   prof: 10088
   exporter_port: 9510
+  metanode_reserved_mem: "67108864"
   resources:
     enabled: false
     requests:

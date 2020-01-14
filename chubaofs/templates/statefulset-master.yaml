@@ -50,6 +50,8 @@ spec:
               value: {{ .Values.master.exporter_port | quote }}
             - name: CBFS_CONSUL_ADDR
               value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
+            - name: CBFS_METANODE_RESERVED_MEM
+              value: {{ .Values.master.metanode_reserved_mem | quote }}
             - name: POD_IP
               valueFrom:
                 fieldRef:
