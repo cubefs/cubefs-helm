@@ -32,10 +32,8 @@ path:
 
 datanode:
   disks:
-    - device: /dev/sda
-      retain_space: "21474836480"
-    - device: /dev/sdb
-      retain_space: "21474836480"
+    - disk: "/data0:21474836480"
+    - disk: "/data1:21474836480"
       
 metanode:
   total_mem: "2147483648"

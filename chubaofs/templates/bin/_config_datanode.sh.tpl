@@ -3,30 +3,21 @@
 set -ex
 export LC_ALL=C
 
-n=0
 DISK_DIR=""
 arr=(${CBFS_DATANODE_DISKS//,/ })  
 for i in ${arr[@]}; do   
-  Dev=$(echo $i | awk -F ":" '{print $1}')
+  Dir=$(echo $i | awk -F ":" '{print $1}')
   Quaota=$(echo $i | awk -F ":" '{print $2}')
-  MountDir="/data$n"
-  Type=$(blkid -o value -s TYPE $Dev)
-  if [ -z $Type ];then
-    echo "device[$Dev] not exist"
-    continne
+  DataDir=""
+
+  if [[ "$Dir" =~ ^/.* ]]; then
+    DataDir=$Dir
+  else
+    DataDir="/cfs/data/$Dir"
   fi
 
-  if [ $Type != "xfs" ];then
-    echo "format device[$Dev]"
-    mkfs.xfs -f $Dev
-    if [ "X"$? != "X"0 ];then
-      echo "device[$Dev] format fail"
-      continne
-    fi
-  fi
-
-  n=$(($n+1))
-  test -z $DISK_DIR && DISK_DIR="$MountDir:$Quaota" || DISK_DIR=$DISK_DIR",$MountDir:$Quaota" 
+  mkdir -p $DataDir
+  test -z $DISK_DIR && DISK_DIR="$DataDir:$Quaota" || DISK_DIR=$DISK_DIR",$DataDir:$Quaota" 
 done
 echo "DISK_DIR="$DISK_DIR
 if [ -z $DISK_DIR ];then
@@ -63,4 +54,5 @@ jq -n \
 
 cat /cfs/conf/datanode.json
 echo "after prepare config"
+
 

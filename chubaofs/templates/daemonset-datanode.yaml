@@ -59,6 +59,14 @@ spec:
               readOnly: true
             - name: chubaofs-conf
               mountPath: /cfs/conf
+            {{- if $.Values.path.data }}
+            - name: pod-data-path
+              mountPath: /cfs/data
+              readOnly: false
+            {{- end }}
+{{- range .Values.datanode.disks }}
+{{ tuple $envAll .disk | include "helm-toolkit.utils.datanode.disks.volumes_mount" | indent 12 }}
+{{- end }}
         - name: prepare-pod
           image: busybox
           command: ['sh', '-c', 'until nslookup $CBFS_MASTER_SERVICE; do echo waiting for $CBFS_MASTER_SERVICE; sleep 2; done;']
@@ -75,8 +83,6 @@ spec:
           env:
             - name: TZ
               value: Asia/Shanghai
-            - name: CBFS_DATANODE_DISKS
-              value: {{ include "chubaofs.datanode.disks" . | quote }}
           ports:
 {{ tuple $envAll "port" .Values.datanode.port | include "helm-toolkit.utils.container_port" | indent 12 }}
 {{ tuple $envAll "prof" .Values.datanode.prof | include "helm-toolkit.utils.container_port" | indent 12 }}
@@ -100,6 +106,9 @@ spec:
               mountPath: /cfs/data
               readOnly: false
             {{- end }}
+{{- range .Values.datanode.disks }}
+{{ tuple $envAll .disk | include "helm-toolkit.utils.datanode.disks.volumes_mount" | indent 12 }}
+{{- end }}
 {{ tuple $envAll $envAll.Values.datanode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
         - name: chubaofs-bin
@@ -118,6 +127,9 @@ spec:
           hostPath:
             path: {{ $.Values.path.data }}
         {{- end }}
+{{- range .Values.datanode.disks }}
+{{ tuple $envAll .disk | include "helm-toolkit.utils.datanode.disks.volumes" | indent 8 }}
+{{- end }}
 {{ end }}
 
 

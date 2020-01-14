@@ -74,12 +74,8 @@ datanode:
   raft_replica: 9096
   exporter_port: 9512
   disks:
-    - device: /dev/sda
-      retain_space: "21474836480"
-    - device: /dev/sdb
-      retain_space: "21474836480"
-    - device: /dev/sdc
-      retain_space: "21474836480"
+    - disk: "data0:21474836480"
+    - disk: "data1:21474836480"
   resources:
     enabled: false
     requests:
