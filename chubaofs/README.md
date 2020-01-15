@@ -54,7 +54,7 @@ kubectl label node <nodename> chuabaofs-datanode=enabled
 
 ### Deploy ChubaoFS cluster
 ```
-$ helm install chubaofs chubaofs/chubaofs --version 1.4.1 -f ~/chubaofs.yaml
+$ helm install chubaofs chubaofs/chubaofs --version 1.5.0 -f ~/chubaofs.yaml
 ```
 
 ### Delete ChubaoFS cluster

@@ -21,6 +21,7 @@ jq -n \
   --arg exporterPort "$CBFS_MASTER_EXPORTER_PORT" \
   --arg logLevel "$CBFS_MASTER_LOG_LEVEL" \
   --arg consulAddr "$CBFS_CONSUL_ADDR" \
+  --arg metaNodeReservedMem "$CBFS_METANODE_RESERVED_MEM" \
   '{
     "role": "master",
     "ip": $ip,
@@ -35,7 +36,8 @@ jq -n \
     "storeDir": "/cfs/data/master/rocksdbstore",
     "consulAddr": $consulAddr,
     "exporterPort": $exporterPort,
-    "clusterName": $clusterName
+    "clusterName": $clusterName,
+    "metaNodeReservedMem": $metaNodeReservedMem 
 }' > /cfs/conf/master.json
 
 cat /cfs/conf/master.json
