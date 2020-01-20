@@ -10,8 +10,8 @@ component:
   monitor: true
 
 image:
-  server: chubaofs/cfs-server:1.5.0
-  client: chubaofs/cfs-client:1.5.0
+  server: chubaofs/cfs-server:1.5.1
+  client: chubaofs/cfs-client:1.5.1
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
@@ -31,9 +31,9 @@ master:
     node_selector_value: enabled
   log_level: info
   retain_logs: 2000
-  port: 8080
-  prof: 10088
-  exporter_port: 9510
+  port: 17010 
+  prof: 17020 
+  exporter_port: 9500 
   metanode_reserved_mem: "67108864"
   resources:
     enabled: false
@@ -50,11 +50,11 @@ metanode:
     node_selector_value: enabled
   log_level: info
   total_mem: "2147483648"
-  port: 9021
-  prof: 9092
-  raft_heartbeat: 9093
-  raft_replica: 9094
-  exporter_port: 9511
+  port: 17210 
+  prof: 17220 
+  raft_heartbeat: 17230 
+  raft_replica: 17240
+  exporter_port: 9510 
   resources:
     enabled: false
     requests:
@@ -69,11 +69,11 @@ datanode:
     node_selector_key: chuabaofs-datanode
     node_selector_value: enabled
   log_level: info
-  port: 6000
-  prof: 6001
-  raft_heartbeat: 9095
-  raft_replica: 9096
-  exporter_port: 9512
+  port: 17310 
+  prof: 17320 
+  raft_heartbeat: 17330 
+  raft_replica: 17340 
+  exporter_port: 9520
   disks:
     - disk: "data0:21474836480"
     - disk: "data1:21474836480"
@@ -91,8 +91,8 @@ client:
   vol_name: "test"
   owner: "chubaofs"
   log_level: info
-  exporter_port: 9513
-  prof: 10094
+  exporter_port: 9530
+  prof: 17410 
   resources:
     enabled: false
     requests:

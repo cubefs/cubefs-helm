@@ -39,7 +39,7 @@ jq -n \
   --arg disks "$DISK_DIR" \
   '{
     "role": "datanode",
-    "port": $port,
+    "listen": $port,
     "prof": $prof,
     "logDir": "/cfs/logs",
     "logLevel": $logLevel,

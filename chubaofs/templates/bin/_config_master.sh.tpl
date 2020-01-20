@@ -25,7 +25,7 @@ jq -n \
   '{
     "role": "master",
     "ip": $ip,
-    "port": $port,
+    "listen": $port,
     "prof": $prof,
     "id": $id,
     "peers": $peers,
