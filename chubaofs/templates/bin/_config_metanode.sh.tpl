@@ -29,8 +29,8 @@ jq -n \
      "consulAddr": $consulAddr,
      "exporterPort": $exporterPort,
      "totalMem": $totalMem,
-     "masterAddrs": $masterAddrs
- }' | jq '.masterAddrs |= split(",")' > /cfs/conf/metanode.json
+     "masterAddr": $masterAddrs
+ }' | jq '.masterAddr |= split(",")' > /cfs/conf/metanode.json
 
 cat /cfs/conf/metanode.json
 echo "after prepare config"
