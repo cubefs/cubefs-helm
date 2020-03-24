@@ -36,6 +36,10 @@ spec:
               value: {{ .Values.metanode.port | quote }}
             - name: CBFS_METANODE_PROF
               value: {{ .Values.metanode.prof | quote }}
+            - name: CBFS_METANODE_LOCALIP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: CBFS_METANODE_LOG_LEVEL
               value: {{ .Values.metanode.log_level | quote }}
             - name: CBFS_METANODE_RAFT_HEARTBEAT_PORT

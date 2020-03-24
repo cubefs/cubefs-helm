@@ -38,6 +38,10 @@ spec:
               value: {{ .Values.datanode.port | quote }}
             - name: CBFS_DATANODE_PROF
               value: {{ .Values.datanode.prof | quote }}
+            - name: CBFS_DATANODE_LOCALIP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: CBFS_DATANODE_LOG_LEVEL
               value: {{ .Values.datanode.log_level | quote }}
             - name: CBFS_MASTER_ADDRS
