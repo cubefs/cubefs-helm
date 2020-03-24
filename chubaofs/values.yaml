@@ -5,13 +5,14 @@ component:
   master: true
   datanode: true
   metanode: true
+  objectnode: true
   client: true
   provisioner: false
   monitor: true
 
 image:
-  server: chubaofs/cfs-server:1.5.1
-  client: chubaofs/cfs-client:1.5.1
+  server: chubaofs/cfs-server:2.0.0
+  client: chubaofs/cfs-client:2.0.0
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
@@ -77,6 +78,23 @@ datanode:
   disks:
     - disk: "data0:21474836480"
     - disk: "data1:21474836480"
+  resources:
+    enabled: false
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1024Mi"
+      cpu: "1000m"
+
+objectnode:
+  replicas: 3
+  log_level: info
+  port: 1601 
+  prof: 7011
+  exporter_port: 9500
+  region: "spark"
+  domains: "objectcfs.jd.local,objectnode.cfs.jd.local"
   resources:
     enabled: false
     requests:

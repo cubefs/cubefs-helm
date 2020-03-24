@@ -1,0 +1,89 @@
+{{- if .Values.component.objectnode }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: objectnode
+  labels:
+{{ tuple $envAll $namespace "objectnode" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ .Values.objectnode.replicas }}
+  selector:
+    matchLabels:
+{{ tuple $envAll $namespace "objectnode" | include "helm-toolkit.metadata_labels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $namespace "objectnode" | include "helm-toolkit.metadata_labels" | indent 8 }}
+    spec:
+      initContainers:
+        - name: waiting-master-service
+          image: busybox:1.28
+          command: ['sh', '-c', "until nslookup master-service.{{- $.Values.namespace -}}.svc.cluster.local; do echo waiting for master service; sleep 10; done"]
+        - name: init-config
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command:
+            - /tmp/config-objectnode.sh
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: CBFS_OBJECTNODE_PORT
+              value: {{ .Values.objectnode.port | quote }}
+            - name: CBFS_OBJECTNODE_PROF
+              value: {{ .Values.objectnode.prof | quote }}
+            - name: CBFS_OBJECTNODE_LOG_LEVEL
+              value: {{ .Values.objectnode.log_level | quote }}
+            - name: CBFS_MASTER_ADDRS
+              value: {{ include "chubaofs.master.master-service.address" . | quote }}
+            - name: CBFS_OBJECTNODE_EXPORTER_PORT
+              value: {{ .Values.objectnode.exporter_port | quote }}
+            - name: CBFS_OBJECTNODE_REGION
+              value: {{ .Values.objectnode.region }}
+            - name: CBFS_OBJECTNODE_DOMAINS
+              value: {{ .Values.objectnode.domains }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /tmp/config-objectnode.sh
+              subPath: config-objectnode.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /cfs/conf
+      containers:
+        - name: objectnode-pod
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "/cfs/bin/start.sh" ]
+          securityContext:
+            privileged: true
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+{{ tuple $envAll "port" .Values.objectnode.port | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll "prof" .Values.objectnode.prof | include "helm-toolkit.utils.container_port" | indent 12 }}
+{{ tuple $envAll "exporter-port" .Values.objectnode.exporter_port | include "helm-toolkit.utils.container_port" | indent 12 }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/start.sh
+              subPath: start-objectnode.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /cfs/conf
+{{ tuple $envAll $envAll.Values.objectnode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+      volumes:
+        - name: chubaofs-bin
+          configMap:
+            name: chubaofs-bin
+            defaultMode: 0555
+        - name: chubaofs-conf
+          emptyDir: {}
+{{ end }}
+
+
+
+
+

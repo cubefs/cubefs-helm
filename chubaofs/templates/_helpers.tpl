@@ -21,7 +21,9 @@ master-service.{{- $.Values.namespace -}}.svc.cluster.local
 {{- end -}}
 
 {{- define "chubaofs.master.master-service.address" -}}
-master-service.{{- $.Values.namespace -}}.svc.cluster.local:{{- $.Values.master.port }}
+{{- range $i, $e := until (.Values.master.replicas | int) -}}
+{{ if ne $i 0 }},{{ end }}master-{{ $i }}.master-service.{{- $.Values.namespace -}}.svc.cluster.local:{{- $.Values.master.port -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "chubaofs.monitor.consul.address" -}}

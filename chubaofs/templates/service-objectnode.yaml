@@ -1,0 +1,17 @@
+{{- if .Values.component.objectnode }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: objectnode-service
+  namespace: {{ $namespace }}
+spec:
+  ports:
+    - port: {{ .Values.objectnode.port }}
+      protocol: TCP
+      targetPort: {{ .Values.objectnode.port }}
+  selector:
+{{ tuple $envAll $namespace "objectnode" | include "helm-toolkit.metadata_labels" | indent 4 }}
+{{ end }}

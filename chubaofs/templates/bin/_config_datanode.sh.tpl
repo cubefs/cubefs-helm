@@ -30,6 +30,7 @@ echo "before prepare config..."
 jq -n \
   --arg port "$CBFS_DATANODE_PORT" \
   --arg prof "$CBFS_DATANODE_PROF" \
+  --arg localIP "$CBFS_DATANODE_LOCALIP" \
   --arg logLevel "$CBFS_DATANODE_LOG_LEVEL" \
   --arg raftHeartbeat "$CBFS_DATANODE_RAFT_HEARTBEAT_PORT" \
   --arg raftReplica "$CBFS_DATANODE_RAFT_REPLICA_PORT" \
@@ -40,6 +41,7 @@ jq -n \
   '{
     "role": "datanode",
     "listen": $port,
+    "localIP": $localIP,
     "prof": $prof,
     "logDir": "/cfs/logs",
     "logLevel": $logLevel,

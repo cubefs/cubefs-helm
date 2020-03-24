@@ -32,6 +32,12 @@ data:
   start-client.sh: |+
 {{ tuple "bin/_start_client.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
+{{- if .Values.component.objectnode }}
+  config-objectnode.sh: |+
+{{ tuple "bin/_config_objectnode.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  start-objectnode.sh: |+
+{{ tuple "bin/_start_objectnode.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+{{- end }}
 
 {{- end }}
 
