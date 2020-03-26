@@ -24,11 +24,22 @@ spec:
       hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
+        - name: check-master-service
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command: [ "/bin/bash", "/cfs/bin/check-master-service.sh" ]
+          env:
+            - name: CBFS_MASTER_SERVICE_PORT
+              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/check-master-service.sh
+              subPath: check-master-service.sh
+              readOnly: true
         - name: init-config
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
-          command:
-            - /tmp/config-datanode.sh
+          command: [ "/bin/bash", "/cfs/bin/config-datanode.sh" ]
           securityContext:
             privileged: true
           env:
@@ -45,7 +56,7 @@ spec:
             - name: CBFS_DATANODE_LOG_LEVEL
               value: {{ .Values.datanode.log_level | quote }}
             - name: CBFS_MASTER_ADDRS
-              value: {{ include "chubaofs.master.master-service.address" . | quote }}
+              value: {{ include "chubaofs.master.address.array" . | quote }}
             - name: CBFS_DATANODE_RAFT_HEARTBEAT_PORT
               value: {{ .Values.datanode.raft_heartbeat | quote }}
             - name: CBFS_DATANODE_RAFT_REPLICA_PORT
@@ -58,7 +69,7 @@ spec:
               value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
           volumeMounts:
             - name: chubaofs-bin
-              mountPath: /tmp/config-datanode.sh
+              mountPath: /cfs/bin/config-datanode.sh
               subPath: config-datanode.sh
               readOnly: true
             - name: chubaofs-conf
@@ -68,20 +79,11 @@ spec:
               mountPath: /cfs/data
               readOnly: false
             {{- end }}
-{{- range .Values.datanode.disks }}
-{{ tuple $envAll .disk | include "helm-toolkit.utils.datanode.disks.volumes_mount" | indent 12 }}
-{{- end }}
-        - name: prepare-pod
-          image: busybox
-          command: ['sh', '-c', 'until nslookup $CBFS_MASTER_SERVICE; do echo waiting for $CBFS_MASTER_SERVICE; sleep 2; done;']
-          env:
-            - name: CBFS_MASTER_SERVICE
-              value: {{ include "chubaofs.master.master-service" . | quote }}
       containers:
         - name: datanode-pod
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "/bin/sh", "-c", "/cfs/bin/start.sh" ]
+          command: [ "/bin/bash", "/cfs/bin/start.sh" ]
           securityContext:
             privileged: true
           env:
@@ -111,7 +113,7 @@ spec:
               readOnly: false
             {{- end }}
 {{- range .Values.datanode.disks }}
-{{ tuple $envAll .disk | include "helm-toolkit.utils.datanode.disks.volumes_mount" | indent 12 }}
+{{ tuple $envAll . | include "helm-toolkit.utils.datanode.disks.volumes_mount" | indent 12 }}
 {{- end }}
 {{ tuple $envAll $envAll.Values.datanode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
@@ -132,7 +134,7 @@ spec:
             path: {{ $.Values.path.data }}
         {{- end }}
 {{- range .Values.datanode.disks }}
-{{ tuple $envAll .disk | include "helm-toolkit.utils.datanode.disks.volumes" | indent 8 }}
+{{ tuple $envAll . | include "helm-toolkit.utils.datanode.disks.volumes" | indent 8 }}
 {{- end }}
 {{ end }}
 

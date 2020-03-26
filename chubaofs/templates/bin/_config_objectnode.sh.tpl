@@ -1,10 +1,8 @@
 #!/bin/bash
 
-set -ex
-export LC_ALL=C
-
+# set -ex
 # source init_dirs.sh
-echo "before prepare config..."
+echo "prepare to create configuration file"
 
 jq -n \
   --arg port "$CBFS_OBJECTNODE_PORT" \
@@ -27,7 +25,7 @@ jq -n \
  }' | jq '.masterAddr |= split(",")' | jq '.domains |= split(",")' > /cfs/conf/objectnode.json
 
 cat /cfs/conf/objectnode.json
-echo "after prepare config"
+echo "configuration finished"
 
 
 

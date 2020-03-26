@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -ex
-GET_CLUSTER_URL="http://$CBFS_MASTER_SERVICE:$CBFS_MASTER_PORT/admin/getCluster"
-CREATE_VOL_URL="http://$CBFS_MASTER_SERVICE:$CBFS_MASTER_PORT/admin/createVol?name=$CBFS_CLIENT_VOL_NAME&capacity=20&owner=$CBFS_CLIENT_OWNER&mpCount=3"
+# set -ex
+GET_CLUSTER_URL="http://$CBFS_MASTER_SERVICE_PORT/admin/getCluster"
+CREATE_VOL_URL="http://$CBFS_MASTER_SERVICE_PORT/admin/createVol?name=$CBFS_CLIENT_VOL_NAME&capacity=20&owner=$CBFS_CLIENT_OWNER&mpCount=3"
 SERVICE_NOT_UNAVAILABLE=99999
 
 function err_exit {
@@ -41,7 +41,6 @@ function create_vol {
 }
 
 function start_check {
-  sleep 15 
   check_status "MetaNode"
   check_status "DataNode"
 
@@ -53,7 +52,6 @@ function start_check {
   fi
 }
 
-until nslookup $CBFS_MASTER_SERVICE; do echo waiting for $CBFS_MASTER_SERVICE;sleep 2;done;
 start_check
 
 

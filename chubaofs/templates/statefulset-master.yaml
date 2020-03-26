@@ -29,8 +29,7 @@ spec:
         - name: init-config
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
-          command:
-            - /tmp/config-master.sh
+          command: [ "/bin/bash", "/cfs/bin/config-master.sh" ]
           env:
             - name: TZ
               value: Asia/Shanghai
@@ -62,7 +61,7 @@ spec:
                   fieldPath: metadata.name
           volumeMounts:
             - name: chubaofs-bin
-              mountPath: /tmp/config-master.sh
+              mountPath: /cfs/bin/config-master.sh
               subPath: config-master.sh
               readOnly: true
             - name: chubaofs-conf
@@ -71,7 +70,7 @@ spec:
         - name: master-pod
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
-          command: [ "/bin/sh", "-c", "/cfs/bin/start.sh" ]
+          command: [ "/bin/bash", "/cfs/bin/start.sh" ]
           securityContext:
             privileged: true
           env:

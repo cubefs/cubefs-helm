@@ -11,6 +11,8 @@ data:
 {{ tuple "bin/_config_master.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   start-master.sh: |+
 {{ tuple "bin/_start_master.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  check-master-service.sh: |+
+{{ tuple "bin/_check_master_service.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.component.datanode }}
   config-datanode.sh: |+

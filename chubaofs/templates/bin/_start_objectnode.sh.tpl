@@ -1,6 +1,5 @@
 #!/bin/bash
-set -ex
-export LC_ALL=C
+# set -ex
 
 cat /cfs/conf/objectnode.json
 echo "start objectnode"

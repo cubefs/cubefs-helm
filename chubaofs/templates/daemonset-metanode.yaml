@@ -24,11 +24,22 @@ spec:
       hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
+        - name: check-master-service
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command: [ "/bin/bash", "/cfs/bin/check-master-service.sh" ]
+          env:
+            - name: CBFS_MASTER_SERVICE_PORT
+              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/check-master-service.sh
+              subPath: check-master-service.sh
+              readOnly: true
         - name: init-config
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
-          command:
-            - /tmp/config-metanode.sh
+          command: [ "/bin/bash", "/cfs/bin/config-metanode.sh" ]
           env:
             - name: TZ
               value: Asia/Shanghai
@@ -49,29 +60,23 @@ spec:
             - name: CBFS_METANODE_EXPORTER_PORT
               value: {{ .Values.metanode.exporter_port | quote }}
             - name: CBFS_MASTER_ADDRS
-              value: {{ include "chubaofs.master.master-service.address" . | quote }}
+              value: {{ include "chubaofs.master.address.array" . | quote }}
             - name: CBFS_MASTER_TOTAL_MEM
               value: {{ .Values.metanode.total_mem | quote }}
             - name: CBFS_CONSUL_ADDR
               value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
           volumeMounts:
             - name: chubaofs-bin
-              mountPath: /tmp/config-metanode.sh
+              mountPath: /cfs/bin/config-metanode.sh
               subPath: config-metanode.sh
               readOnly: true
             - name: chubaofs-conf
               mountPath: /cfs/conf
-        - name: prepare-pod
-          image: busybox
-          command: ['sh', '-c', 'until nslookup $CBFS_MASTER_SERVICE; do echo waiting for $CBFS_MASTER_SERVICE; sleep 2; done;']
-          env:
-            - name: CBFS_MASTER_SERVICE
-              value: {{ include "chubaofs.master.master-service" . | quote }}
       containers:
         - name: metanode-pod
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "/bin/sh", "-c", "/cfs/bin/start.sh" ]
+          command: [ "/bin/bash", "/cfs/bin/start.sh" ]
           securityContext:
             privileged: true
           env:

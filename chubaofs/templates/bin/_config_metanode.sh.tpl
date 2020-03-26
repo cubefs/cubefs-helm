@@ -1,10 +1,8 @@
 #!/bin/bash
 
-set -ex
-export LC_ALL=C
-
+# set -ex
 # source init_dirs.sh
-echo "before prepare config..."
+echo "prepare to create configuration file"
 
 jq -n \
   --arg port "$CBFS_METANODE_PORT" \
@@ -35,7 +33,7 @@ jq -n \
  }' | jq '.masterAddr |= split(",")' > /cfs/conf/metanode.json
 
 cat /cfs/conf/metanode.json
-echo "after prepare config"
+echo "configuration finished"
 
 
 
