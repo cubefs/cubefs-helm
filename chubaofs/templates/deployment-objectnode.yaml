@@ -20,14 +20,22 @@ spec:
 {{ tuple $envAll $namespace "objectnode" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
       initContainers:
-        - name: waiting-master-service
-          image: busybox:1.28
-          command: ['sh', '-c', "until nslookup master-service.{{- $.Values.namespace -}}.svc.cluster.local; do echo waiting for master service; sleep 10; done"]
+        - name: check-master-service
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command: [ "/bin/bash", "/cfs/bin/check-master-service.sh" ]
+          env:
+            - name: CBFS_MASTER_SERVICE_PORT
+              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/check-master-service.sh
+              subPath: check-master-service.sh
+              readOnly: true
         - name: init-config
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
-          command:
-            - /tmp/config-objectnode.sh
+          command: [ "/bin/bash", "/cfs/bin/config-objectnode.sh" ]
           env:
             - name: TZ
               value: Asia/Shanghai
@@ -38,7 +46,7 @@ spec:
             - name: CBFS_OBJECTNODE_LOG_LEVEL
               value: {{ .Values.objectnode.log_level | quote }}
             - name: CBFS_MASTER_ADDRS
-              value: {{ include "chubaofs.master.master-service.address" . | quote }}
+              value: {{ include "chubaofs.master.address.array" . | quote }}
             - name: CBFS_OBJECTNODE_EXPORTER_PORT
               value: {{ .Values.objectnode.exporter_port | quote }}
             - name: CBFS_OBJECTNODE_REGION
@@ -47,7 +55,7 @@ spec:
               value: {{ .Values.objectnode.domains }}
           volumeMounts:
             - name: chubaofs-bin
-              mountPath: /tmp/config-objectnode.sh
+              mountPath: /cfs/bin/config-objectnode.sh
               subPath: config-objectnode.sh
               readOnly: true
             - name: chubaofs-conf
@@ -56,7 +64,7 @@ spec:
         - name: objectnode-pod
           image: {{ $.Values.image.server }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "/bin/sh", "-c", "/cfs/bin/start.sh" ]
+          command: [ "/bin/bash", "/cfs/bin/start.sh" ]
           securityContext:
             privileged: true
           env:

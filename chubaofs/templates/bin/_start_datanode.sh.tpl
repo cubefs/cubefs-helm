@@ -1,6 +1,5 @@
 #!/bin/bash
-set -ex
-export LC_ALL=C
+# set -ex
 
 mkdir -p /cfs/data/datanode/raft
 cat /cfs/conf/datanode.json

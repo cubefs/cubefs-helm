@@ -1,10 +1,8 @@
 #!/bin/bash
 
-set -ex
-export LC_ALL=C
-
+# set -ex
 # source init_dirs.sh
-echo "before prepare config..."
+echo "prepare to create configuration file"
 CBFS_HOSTNAME_INDEX=""
 CBFS_ID=""
 CBFS_HOSTNAME_INDEX=`echo $POD_NAME | awk -F '-' '{print $2}'`
@@ -41,4 +39,4 @@ jq -n \
 }' > /cfs/conf/master.json
 
 cat /cfs/conf/master.json
-echo "after prepare config"
+echo "configuration finished"

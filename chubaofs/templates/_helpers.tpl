@@ -16,11 +16,15 @@ Expand the name of the chart.
 {{- end -}}
 {{- end -}}
 
-{{- define "chubaofs.master.master-service" -}}
+{{- define "chubaofs.master-service.with.port" -}}
+master-service.{{- $.Values.namespace -}}.svc.cluster.local:{{- $.Values.master.port -}}
+{{- end -}}
+
+{{- define "chubaofs.master-service" -}}
 master-service.{{- $.Values.namespace -}}.svc.cluster.local
 {{- end -}}
 
-{{- define "chubaofs.master.master-service.address" -}}
+{{- define "chubaofs.master.address.array" -}}
 {{- range $i, $e := until (.Values.master.replicas | int) -}}
 {{ if ne $i 0 }},{{ end }}master-{{ $i }}.master-service.{{- $.Values.namespace -}}.svc.cluster.local:{{- $.Values.master.port -}}
 {{- end -}}
@@ -43,7 +47,7 @@ http://prometheus-service.{{- $envAll.Values.namespace -}}.svc.cluster.local:{{-
 
 {{- define "chubaofs.datanode.disks" -}}
 {{- range $i, $e := .Values.datanode.disks -}}
-{{ if ne $i 0 }},{{ end }}{{- $e.disk -}}
+{{ if ne $i 0 }},{{ end }}{{- $e -}}
 {{- end -}}
 {{- end -}}
 

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -ex
-export LC_ALL=C
+# set -ex
 
 mkdir -p /cfs/mnt
 
