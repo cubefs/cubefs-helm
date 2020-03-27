@@ -2,7 +2,7 @@
 {{- $envAll := . }}
 {{- $namespace := .Values.namespace }}
 ---
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1 
 kind: DaemonSet
 metadata:
   name: datanode
