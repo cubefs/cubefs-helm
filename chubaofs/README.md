@@ -7,7 +7,7 @@ ChubaoFS is a distributed file system for cloud native applications. This chart 
 
 ## Prerequisite 
 
-- Kubernetes 1.16+
+- Kubernetes 1.12+
 - Helm 3 (If you use Helm v2, please read [this documentation](https://github.com/chubaofs/chubaofs-helm/blob/master/README.md))
 
 ## Add ChubaoFS Helm Chart repository
@@ -32,8 +32,8 @@ path:
 
 datanode:
   disks:
-    - disk: "/data0:21474836480"
-    - disk: "/data1:21474836480"
+    - /data0:21474836480
+    - /data1:21474836480
       
 metanode:
   total_mem: "2147483648"

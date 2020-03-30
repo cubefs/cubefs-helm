@@ -6,8 +6,8 @@
 The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubernetes.
 
 ### Prerequisite 
-Kubernetes 1.16+
-Helm 2 (If you use hellm3, please read [this documentation](https://github.com/chubaofs/chubaofs-helm/blob/master/chubaofs/README.md))
+- Kubernetes 1.12+
+- Helm 2 (If you use hellm3, please read [this documentation](https://github.com/chubaofs/chubaofs-helm/blob/master/chubaofs/README.md))
  
 ### Init Helm
 
@@ -45,9 +45,9 @@ path:
 
 datanode:
   disks:
-    - disk: "/data0:21474836480"
-    - disk: "/data1:21474836480"     
- 
+    - /data0:21474836480
+    - /data1:21474836480 
+
 metanode:
   total_mem: "2147483648"
 ```
