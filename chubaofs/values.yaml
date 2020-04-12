@@ -50,20 +50,20 @@ metanode:
     node_selector_key: chuabaofs-metanode
     node_selector_value: enabled
   log_level: info
-  total_mem: "2147483648"
+  total_mem: "17179869184"
   port: 17210 
   prof: 17220 
   raft_heartbeat: 17230 
   raft_replica: 17240
   exporter_port: 9510 
   resources:
-    enabled: false
+    enabled: true
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "16Gi"
+      cpu: "2000m"
     limits:
-      memory: "1024Mi"
-      cpu: "1000m"
+      memory: "64Gi"
+      cpu: "4000m"
 
 datanode:
   labels:
