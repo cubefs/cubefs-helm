@@ -7,12 +7,13 @@ component:
   metanode: true
   objectnode: true
   client: true
-  provisioner: false
+  provisioner: true
   monitor: true
 
 image:
   server: chubaofs/cfs-server:2.0.0
   client: chubaofs/cfs-client:2.0.0
+  csi_driver: chubaofs/cfs-csi-driver:2.0.9
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
@@ -39,18 +40,18 @@ master:
   resources:
     enabled: false
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "8Gi"
+      cpu: "2000m"
     limits:
-      memory: "1024Mi"
-      cpu: "1000m"
+      memory: "32Gi"
+      cpu: "8000m"
 
 metanode:
   labels:
     node_selector_key: chuabaofs-metanode
     node_selector_value: enabled
   log_level: info
-  total_mem: "17179869184"
+  total_mem: "26843545600"
   port: 17210 
   prof: 17220 
   raft_heartbeat: 17230 
@@ -59,11 +60,11 @@ metanode:
   resources:
     enabled: true
     requests:
-      memory: "16Gi"
+      memory: "32Gi"
       cpu: "2000m"
     limits:
-      memory: "64Gi"
-      cpu: "4000m"
+      memory: "256Gi"
+      cpu: "8000m"
 
 datanode:
   labels:
@@ -81,11 +82,11 @@ datanode:
   resources:
     enabled: false
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "8Gi"
+      cpu: "2000m"
     limits:
-      memory: "1024Mi"
-      cpu: "1000m"
+      memory: "32Gi"
+      cpu: "8000m"
 
 objectnode:
   replicas: 3
@@ -120,9 +121,11 @@ client:
       memory: "1024Mi"
       cpu: "1000m"
 
-storageclass:
-  provisioner: chubao.io/chubaofs
-  name: chubaofs
+provisioner:
+  dirver_name: csi.chubaofs.com
+  owner: csiuser
+  log_level: info
+  kubelet_path: /var/lib/kubelet
 
 consul:
   port: 8500

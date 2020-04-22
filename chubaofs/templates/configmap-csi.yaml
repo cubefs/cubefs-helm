@@ -1,0 +1,14 @@
+{{- if .Values.component.provisioner }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: csi-kube-config
+  namespace: {{ $namespace }}
+data:
+  config: |+
+{{ .Files.Get "config/kubeconfig" | indent 4 }}
+---
+{{ end }}

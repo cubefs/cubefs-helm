@@ -7,32 +7,26 @@ The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubern
 
 ### Prerequisite 
 - Kubernetes 1.12+
-- Helm 2 (If you use hellm3, please read [this documentation](https://github.com/chubaofs/chubaofs-helm/blob/master/chubaofs/README.md))
- 
-### Init Helm
+- CSI spec version 0.3.0
+- Helm 3
 
-``` 
-$ helm init
-```
-
-### Start Helm
-
-```
-$ helm serve &
-$ helm repo add local http://localhost:8879/charts
-```
-
-### Add chubaofs-helm to the local repository
+### Download chubaofs-helm
 
 ```
 $ git clone https://github.com/chubaofs/chubaofs-helm
 $ cd chubaofs-helm
-$ make
+```
+
+### Copy kubeconfig file
+ChubaoFS CSI driver will use client-go to connect the Kubernetes API Server. First you need to copy the kubeconfig file to `chubaofs-helm/chubaofs/config/` directory, and rename to kubeconfig
+
+```
+$ cp ~/.kube/config chubaofs/config/kubeconfig
 ```
 
 ### Create configuration yaml file
 
-Create chubaofs.yaml, an put it in a user-defined path. Suppose this is where we put it.
+Create a `chubaofs.yaml` file, and put it in a user-defined path. Suppose this is where we put it.
 
 ```
 $ cat ~/chubaofs.yaml 
@@ -49,7 +43,10 @@ datanode:
     - /data1:21474836480 
 
 metanode:
-  total_mem: "2147483648"
+  total_mem: "26843545600"
+
+provisioner:
+  kubelet_path: /var/lib/kubelet
 ```
 
 > Note that `chubaofs-helm/chubaofs/values.yaml` shows all the config parameters of ChubaoFS.
@@ -57,17 +54,18 @@ metanode:
 
 ### Add labels to Kubernetes node
 
-There are 3 roles for ChubaoFS servers, master/metanode/datanode. Tag each Kubernetes node with the appropriate labels accorindly.
+You should tag each Kubernetes node with the appropriate labels accorindly for server node and CSI node of ChubaoFS.
 
 ```
 kubectl label node <nodename> chuabaofs-master=enabled
 kubectl label node <nodename> chuabaofs-metanode=enabled
 kubectl label node <nodename> chuabaofs-datanode=enabled
+kubectl label node <nodename> chubaofs-csi-node=enabled
 ```
 
 ### Deploy ChubaoFS cluster
 ```
-$ helm install --name=chubaofs local/chubaofs -f ~/chubaofs.yaml
+$ helm install chubaofs ./chubaofs -f ~/chubaofs.yaml
 ```
 
 The output of `helm install` shows servers to be deployed.
@@ -77,20 +75,25 @@ Use the following command to check pod status, which may take a few minutes.
 ```
 $ kubectl -n chubaofs get pods
 NAME                         READY   STATUS    RESTARTS   AGE
-client-6cb87f4f-xrhfm        1/1     Running   0          21s
-consul-59ddb8cffc-p7hw9      1/1     Running   0          68s
-datanode-89fxb               1/1     Running   0          67s
-datanode-jgjqc               1/1     Running   0          67s
-datanode-lfsqv               1/1     Running   0          67s
-datanode-qm8hz               1/1     Running   0          67s
-grafana-65ccb7f885-n4ggz     1/1     Running   0          68s
-master-0                     1/1     Running   0          67s
-master-1                     1/1     Running   0          59s
-master-2                     1/1     Running   0          53s
-metanode-5qg7r               1/1     Running   0          67s
-metanode-8xc2r               1/1     Running   0          68s
-metanode-xjstj               1/1     Running   0          67s
-prometheus-588f669b6-26dbp   1/1     Running   0          68s
+cfs-csi-controller-cfc7754b-ptvlq   3/3     Running   0          2m40s
+cfs-csi-node-q262p                  2/2     Running   0          2m40s
+cfs-csi-node-sgvtf                  2/2     Running   0          2m40s
+client-55786c975d-vttcx             1/1     Running   0          2m40s
+consul-787fdc9c7d-cvwgz             1/1     Running   0          2m40s
+datanode-2rcmz                      1/1     Running   0          2m40s
+datanode-7c9gv                      1/1     Running   0          2m40s
+datanode-s2w8z                      1/1     Running   0          2m40s
+grafana-6964fd5775-6z5lx            1/1     Running   0          2m40s
+master-0                            1/1     Running   0          2m40s
+master-1                            1/1     Running   0          2m34s
+master-2                            1/1     Running   0          2m27s
+metanode-bwr8f                      1/1     Running   0          2m40s
+metanode-hdn5b                      1/1     Running   0          2m40s
+metanode-w9snq                      1/1     Running   0          2m40s
+objectnode-6598bd9c87-8kpvv         1/1     Running   0          2m40s
+objectnode-6598bd9c87-ckwsh         1/1     Running   0          2m40s
+objectnode-6598bd9c87-pj7fc         1/1     Running   0          2m40s
+prometheus-6dcf97d7b-5v2xw          1/1     Running   0          2m40s
 ```
 
 Check cluster status
@@ -99,10 +102,69 @@ Check cluster status
 helm status chubaofs
 ```
 
-Delete cluster
+## Use ChubaoFS CSI as backend storage
+
+After installing ChubaoFS using helm, the StorageClass named `cfs-sc` of ChubaoFS has been created. Next, you can to create
+a PVC that the `storageClassName`  value is `cfs-sc` to using ChubaoFS as backend storage.
+
+An example `pvc.yaml` is shown below.
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cfs-pvc
+spec:
+  accessModes:
+  - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: cfs-sc
+```
 
 ```
-helm delete --purge chubaofs
+$ kubectl create -f pvc.yaml
+```
+
+There is an example `deployment.yaml` using the PVC as below
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cfs-csi-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cfs-csi-demo-pod
+  template:
+    metadata:
+      labels:
+        app: cfs-csi-demo-pod
+    spec:
+      nodeSelector:
+        chubaofs-csi-node: enabled
+      containers:
+        - name: cfs-csi-demo
+          image: nginx:1.17.9
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 80
+              name: "http-server"
+          volumeMounts:
+            - mountPath: "/usr/share/nginx/html"
+              name: mypvc
+      volumes:
+        - name: mypvc
+          persistentVolumeClaim:
+            claimName: cfs-pvc
+```
+
+```
+$ kubectl create -f deployment.yaml
 ```
 
 ## Config Monitoring System (optional)
@@ -149,3 +211,11 @@ Add a local DNS in `/etc/hosts` in order for a request to find the ingress contr
 ```
 
 At this point, dashboard can be visited by `http://monitor.chubaofs.com`.
+
+## Uninstall ChubaoFS 
+
+uninstall ChubaoFS cluster using helm
+
+```
+helm delete chubaofs
+```
