@@ -1,0 +1,9 @@
+FROM centos:7.2.1511
+
+RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo && \
+    curl -o /etc/yum.repos.d/epel-7.repo http://mirrors.aliyun.com/repo/epel-7.repo && \
+    sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/CentOS-Base.repo && \
+    yum install -y xz-utils make gcc flex bison automake autoconf golang wget gcc-c++ which bzip2 bzip2-devel zlib zlib-devel
+
+RUN wget https://cmake.org/files/v3.10/cmake-3.10.0-rc3.tar.gz && tar -zxvf cmake-3.10.0-rc3.tar.gz && \
+    cd cmake-3.10.0-rc3 && ./bootstrap && gmake && gmake install

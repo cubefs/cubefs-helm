@@ -1,14 +1,13 @@
 #!/bin/bash
 
-set -ex
-export LC_ALL=C
-
+# set -ex
 # source init_dirs.sh
-echo "before prepare config..."
+echo "prepare to create configuration file"
 
 jq -n \
   --arg port "$CBFS_METANODE_PORT" \
   --arg prof "$CBFS_METANODE_PROF" \
+  --arg localIP "$CBFS_METANODE_LOCALIP" \
   --arg logLevel "$CBFS_METANODE_LOG_LEVEL" \
   --arg raftHeartbeatPort "$CBFS_METANODE_RAFT_HEARTBEAT_PORT" \
   --arg raftReplicaPort "$CBFS_METANODE_RAFT_REPLICA_PORT" \
@@ -20,6 +19,7 @@ jq -n \
      "role": "metanode",
      "listen": $port,
      "prof": $prof,
+     "localIP": $localIP,
      "logLevel": $logLevel,
      "metadataDir": "/cfs/data",
      "logDir": "/cfs/logs",
@@ -33,7 +33,7 @@ jq -n \
  }' | jq '.masterAddr |= split(",")' > /cfs/conf/metanode.json
 
 cat /cfs/conf/metanode.json
-echo "after prepare config"
+echo "configuration finished"
 
 
 
