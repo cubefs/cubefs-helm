@@ -13,7 +13,7 @@ component:
 image:
   server: chubaofs/cfs-server:2.0.1
   client: chubaofs/cfs-client:2.0.1
-  csi_driver: chubaofs/cfs-csi-driver:2.0.9
+  csi_driver: chubaofs/cfs-csi-driver:2.1.2
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
