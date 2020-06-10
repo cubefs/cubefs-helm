@@ -11,8 +11,8 @@ component:
   monitor: true
 
 image:
-  server: chubaofs/cfs-server:2.0.1
-  client: chubaofs/cfs-client:2.0.1
+  server: chubaofs/cfs-server:2.0.5
+  client: chubaofs/cfs-client:2.0.5
   csi_driver: chubaofs/cfs-csi-driver:2.1.2
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
