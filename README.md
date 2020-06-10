@@ -192,7 +192,7 @@ $ kubectl apply -f mandatory.yaml
 Get the IP address of Nginx ingress controller.
 
 ```
-$ kubectl get pods -A -o wide | grep nginx-ingress-controller
+$ kubectl get pods --all-namespaces -o wide | grep nginx-ingress-controller
 ingress-nginx   nginx-ingress-controller-5bbd46cd86-q88sw    1/1     Running   0          115m   10.196.31.101   host-10-196-31-101   <none>           <none>
 ```
 

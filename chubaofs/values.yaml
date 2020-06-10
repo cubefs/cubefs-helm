@@ -9,6 +9,7 @@ component:
   client: true
   provisioner: true
   monitor: true
+  ingress: true
 
 image:
   server: chubaofs/cfs-server:2.0.5
@@ -96,6 +97,7 @@ objectnode:
   exporter_port: 9500
   region: "spark"
   domains: "objectcfs.jd.local,objectnode.cfs.jd.local"
+  host: objectnode.chubaofs.com
   resources:
     enabled: false
     requests:
