@@ -14,6 +14,7 @@ The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubern
 
 ```
 $ git clone https://github.com/chubaofs/chubaofs-helm
+$ git checkout -b k8s_v1.12.0 origin/k8s_v1.12.0
 $ cd chubaofs-helm
 ```
 
@@ -29,10 +30,15 @@ $ cp ~/.kube/config chubaofs/config/kubeconfig
 Create a `chubaofs.yaml` file, and put it in a user-defined path. Suppose this is where we put it.
 
 ```
-$ cat ~/chubaofs.yaml 
+$ vi ~/chubaofs.yaml 
 ```
 
 ``` yaml
+component:
+  provisioner: true
+  monitor: true
+  ingress: false
+
 path:
   data: /chubaofs/data
   log: /chubaofs/log
@@ -49,7 +55,7 @@ provisioner:
   kubelet_path: /var/lib/kubelet
 ```
 
-> Note that `chubaofs-helm/chubaofs/values.yaml` shows all the config parameters of ChubaoFS.
+> Note that `chubaofs/values.yaml` shows all the config parameters of ChubaoFS.
 > The parameters `path.data` and `path.log` are used to store server data and logs, respectively.
 
 ### Add labels to Kubernetes node
