@@ -7,12 +7,14 @@ component:
   metanode: true
   objectnode: true
   client: true
-  provisioner: false
+  provisioner: true
   monitor: true
+  ingress: true
 
 image:
-  server: chubaofs/cfs-server:2.0.0
-  client: chubaofs/cfs-client:2.0.0
+  server: chubaofs/cfs-server:2.0.5
+  client: chubaofs/cfs-client:2.0.5
+  csi_driver: chubaofs/cfs-csi-driver:2.1.2
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
@@ -39,31 +41,31 @@ master:
   resources:
     enabled: false
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "8Gi"
+      cpu: "2000m"
     limits:
-      memory: "1024Mi"
-      cpu: "1000m"
+      memory: "32Gi"
+      cpu: "8000m"
 
 metanode:
   labels:
     node_selector_key: chuabaofs-metanode
     node_selector_value: enabled
   log_level: info
-  total_mem: "2147483648"
+  total_mem: "26843545600"
   port: 17210 
   prof: 17220 
   raft_heartbeat: 17230 
   raft_replica: 17240
   exporter_port: 9510 
   resources:
-    enabled: false
+    enabled: true
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "32Gi"
+      cpu: "2000m"
     limits:
-      memory: "1024Mi"
-      cpu: "1000m"
+      memory: "256Gi"
+      cpu: "8000m"
 
 datanode:
   labels:
@@ -81,11 +83,11 @@ datanode:
   resources:
     enabled: false
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "8Gi"
+      cpu: "2000m"
     limits:
-      memory: "1024Mi"
-      cpu: "1000m"
+      memory: "32Gi"
+      cpu: "8000m"
 
 objectnode:
   replicas: 3
@@ -95,6 +97,7 @@ objectnode:
   exporter_port: 9500
   region: "spark"
   domains: "objectcfs.jd.local,objectnode.cfs.jd.local"
+  host: objectnode.chubaofs.com
   resources:
     enabled: false
     requests:
@@ -120,9 +123,11 @@ client:
       memory: "1024Mi"
       cpu: "1000m"
 
-storageclass:
-  provisioner: chubao.io/chubaofs
-  name: chubaofs
+provisioner:
+  dirver_name: csi.chubaofs.com
+  owner: csiuser
+  log_level: info
+  kubelet_path: /var/lib/kubelet
 
 consul:
   port: 8500

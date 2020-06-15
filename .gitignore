@@ -1,1 +1,3 @@
 *.tgz
+build/bin
+build/chubaofs

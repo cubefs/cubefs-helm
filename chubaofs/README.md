@@ -32,8 +32,8 @@ path:
 
 datanode:
   disks:
-    - disk: "/data0:21474836480"
-    - disk: "/data1:21474836480"
+    - /data0:21474836480
+    - /data1:21474836480
       
 metanode:
   total_mem: "2147483648"
