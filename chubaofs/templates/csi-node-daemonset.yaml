@@ -3,7 +3,7 @@
 {{- $namespace := .Values.namespace }}
 ---
 kind: DaemonSet
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 metadata:
   name: cfs-csi-node
   namespace: {{ $namespace }}
@@ -23,8 +23,8 @@ spec:
         chubaofs-csi-node: enabled
       containers:
         - name: driver-registrar
-          image: quay.io/k8scsi/driver-registrar:v0.4.2
-          imagePullPolicy: IfNotPresent
+          image: {{ $.Values.image.driver_registrar }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
           args:
