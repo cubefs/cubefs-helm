@@ -15,6 +15,9 @@ image:
   server: chubaofs/cfs-server:2.0.5
   client: chubaofs/cfs-client:2.0.5
   csi_driver: chubaofs/cfs-csi-driver:2.1.2
+  csi_provisioner: quay.io/k8scsi/csi-provisioner:v0.4.2 
+  driver_registrar: quay.io/k8scsi/driver-registrar:v0.4.2
+  csi_attacher: quay.io/k8scsi/csi-attacher:v0.4.2
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
