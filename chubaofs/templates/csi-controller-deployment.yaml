@@ -22,8 +22,8 @@ spec:
       #   chubaofs-csi-controller: enabled
       containers:
         - name: external-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v0.4.2
-          imagePullPolicy: IfNotPresent
+          image: {{ $.Values.image.csi_provisioner }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
           args:
@@ -48,8 +48,8 @@ spec:
             - name: kube-config
               mountPath: /etc/kubernetes
         - name: external-attacher
-          image: quay.io/k8scsi/csi-attacher:v0.4.2
-          imagePullPolicy: IfNotPresent
+          image: {{ $.Values.image.csi_attacher }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
           args:
