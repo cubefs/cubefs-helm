@@ -14,7 +14,6 @@ The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubern
 
 ```
 $ git clone https://github.com/chubaofs/chubaofs-helm
-$ git checkout -b k8s_v1.12.0 origin/k8s_v1.12.0
 $ cd chubaofs-helm
 ```
 
