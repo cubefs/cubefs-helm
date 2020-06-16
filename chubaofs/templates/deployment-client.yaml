@@ -20,11 +20,22 @@ spec:
 {{ tuple $envAll $namespace "client" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
       initContainers:
+        - name: check-master-service
+          image: {{ $.Values.image.client }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command: [ "/bin/bash", "/cfs/bin/check-master-service.sh" ]
+          env:
+            - name: CBFS_MASTER_SERVICE_PORT
+              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/check-master-service.sh
+              subPath: check-master-service.sh
+              readOnly: true
         - name: init-config
           image: {{ $.Values.image.client }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
-          command:
-            - /tmp/config-client.sh
+          command: [ "/bin/bash", "/cfs/bin/config-client.sh" ]
           env:
             - name: TZ
               value: Asia/Shanghai
@@ -33,7 +44,7 @@ spec:
             - name: CBFS_CLIENT_LOG_LEVEL
               value: {{ .Values.client.log_level | quote }}
             - name: CBFS_MASTER_ADDRS
-              value: {{ include "chubaofs.master.master-service.address" . | quote }}
+              value: {{ include "chubaofs.master.address.array" . | quote }}
             - name: CBFS_CLIENT_VOL_NAME
               value: {{ .Values.client.vol_name | quote }}
             - name: CBFS_CLIENT_OWNER
@@ -44,16 +55,15 @@ spec:
               value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
           volumeMounts:
             - name: chubaofs-bin
-              mountPath: /tmp/config-client.sh
+              mountPath: /cfs/bin/config-client.sh
               subPath: config-client.sh
               readOnly: true
             - name: chubaofs-conf
               mountPath: /cfs/conf
-        - name: prepare-pod
+        - name: init-volume
           image: {{ $.Values.image.client }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
-          command:
-            - /tmp/check-volumn.sh
+          command: [ "/bin/bash", "/cfs/bin/check-volumn.sh" ]
           securityContext:
             privileged: true
           env:
@@ -61,20 +71,18 @@ spec:
               value: {{ .Values.client.vol_name | quote }}
             - name: CBFS_CLIENT_OWNER
               value: {{ .Values.client.owner | quote }}
-            - name: CBFS_MASTER_SERVICE
-              value: {{ include "chubaofs.master.master-service" . | quote }}
-            - name: CBFS_MASTER_PORT
-              value: {{ .Values.master.port | quote }}
+            - name: CBFS_MASTER_SERVICE_PORT
+              value: {{ include "chubaofs.master-service.with.port" . | quote }}
           volumeMounts:
             - name: chubaofs-bin
-              mountPath: /tmp/check-volumn.sh
+              mountPath: /cfs/bin/check-volumn.sh
               subPath: check-volumn.sh
               readOnly: true
       containers:
         - name: client-pod
           image: {{ $.Values.image.client }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "/bin/sh", "-c", "/cfs/bin/start.sh" ]
+          command: [ "/bin/bash", "/cfs/bin/start.sh" ]
           securityContext:
             privileged: true
           env:

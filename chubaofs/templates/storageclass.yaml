@@ -1,0 +1,26 @@
+{{- if .Values.component.provisioner }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+{{- $consulAddress := tuple $envAll | include "chubaofs.monitor.consul.address" }}
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: cfs-sc
+  namespace: {{ $namespace }}
+provisioner: {{ $.Values.provisioner.dirver_name }}
+reclaimPolicy: Delete
+parameters:
+  # Resource manager IP address or URL
+  masterAddr: {{ include "chubaofs.master-service.with.port" . | quote }}
+  # Consul Service IP address or URL
+  consulAddr: {{ $consulAddress | quote }}
+  # Owner name as authentication
+  owner: {{ $.Values.provisioner.owner }}
+  # Log level：debug, info, warn, error 
+  logLevel: {{ $.Values.provisioner.log_level }}
+---
+{{ end }}
+
+
+
