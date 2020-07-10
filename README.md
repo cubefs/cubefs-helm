@@ -6,7 +6,7 @@
 The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubernetes.
 
 ### Prerequisite 
-- Kubernetes 1.14+
+- Kubernetes 1.16+
 - CSI spec version 1.1.0
 - Helm 3
 
@@ -15,13 +15,6 @@ The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubern
 ```
 $ git clone https://github.com/chubaofs/chubaofs-helm
 $ cd chubaofs-helm
-```
-
-### Copy kubeconfig file
-ChubaoFS CSI driver will use client-go to connect the Kubernetes API Server. First you need to copy the kubeconfig file to `chubaofs-helm/chubaofs/config/` directory, and rename to kubeconfig
-
-```
-$ cp ~/.kube/config chubaofs/config/kubeconfig
 ```
 
 ### Create configuration yaml file
