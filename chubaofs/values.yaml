@@ -9,6 +9,7 @@ component:
   client: true
   provisioner: true
   monitor: true
+  console: true
   ingress: true
 
 image:
@@ -131,6 +132,20 @@ provisioner:
   owner: csiuser
   log_level: info
   kubelet_path: /var/lib/kubelet
+
+console: 
+  replicas: 1
+  log_level: info
+  port: 1602 
+  host: console.chubaofs.com
+  resources:
+    enabled: false
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1024Mi"
+      cpu: "1000m"
 
 consul:
   port: 8500

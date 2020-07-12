@@ -40,6 +40,11 @@ data:
   start-objectnode.sh: |+
 {{ tuple "bin/_start_objectnode.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
-
+{{- if .Values.component.console }}
+  config-console.sh: |+
+{{ tuple "bin/_config_console.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  start-console.sh: |+
+{{ tuple "bin/_start_console.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+{{- end }}
 {{- end }}
 
