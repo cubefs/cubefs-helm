@@ -27,17 +27,15 @@ spec:
           securityContext:
             privileged: true
           args:
-            - --v=5
             - --provisioner=$(DRIVER_NAME)
             - --csi-address=$(ADDRESS)
-            - --kubeconfig=/etc/kubernetes/config
           env:
             - name: TZ
               value: Asia/Shanghai
             - name: DRIVER_NAME
               value: {{ $.Values.provisioner.dirver_name }}
             - name: ADDRESS
-              value: /csi/csi.sock
+              value: /csi/csi-controller.sock
           resources:
             requests:
               cpu: 200m
@@ -45,22 +43,18 @@ spec:
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - name: kube-config
-              mountPath: /etc/kubernetes
         - name: external-attacher
           image: {{ $.Values.image.csi_attacher }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
           args:
-            - --v=5
             - --csi-address=$(ADDRESS)
-            - --kubeconfig=/etc/kubernetes/config
           env:
             - name: TZ
               value: Asia/Shanghai
             - name: ADDRESS
-              value: /csi/csi.sock
+              value: /csi/csi-controller.sock
           resources:
             requests:
               cpu: 200m
@@ -68,8 +62,6 @@ spec:
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - name: kube-config
-              mountPath: /etc/kubernetes
         - name: cfs-driver
           image: {{ $.Values.image.csi_driver }}
           imagePullPolicy: IfNotPresent
@@ -87,12 +79,10 @@ spec:
           env:
             - name: TZ
               value: Asia/Shanghai
-            - name: KUBE_CONFIG
-              value: /etc/kubernetes/config
             - name: LOG_LEVEL
               value: "5"
             - name: CSI_ENDPOINT
-              value: unix:///csi/csi.sock
+              value: unix:///csi/csi-controller.sock
             - name: DRIVER_NAME
               value: {{ $.Values.provisioner.dirver_name }}
             - name: KUBE_NODE_NAME
@@ -100,6 +90,13 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
+          lifecycle:
+            preStop:
+              exec:
+                command: [
+                  "/bin/sh", "-c",
+                  "rm -rf /csi/csi-controller.sock"
+                ]
           resources:
             requests:
               cpu: 200m
@@ -110,8 +107,6 @@ spec:
             - mountPath: /var/lib/kubelet/pods
               mountPropagation: Bidirectional
               name: mountpoint-dir
-            - name: kube-config
-              mountPath: /etc/kubernetes
       volumes:
         - hostPath:
             path: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.chubaofs.com
@@ -121,8 +116,5 @@ spec:
             path: {{ $.Values.provisioner.kubelet_path -}}/pods
             type: Directory
           name: mountpoint-dir
-        - configMap:
-            name: csi-kube-config
-          name: kube-config
 ---
 {{ end }}

@@ -9,15 +9,16 @@ component:
   client: true
   provisioner: true
   monitor: true
+  console: true
   ingress: true
 
 image:
-  server: chubaofs/cfs-server:2.0.5
-  client: chubaofs/cfs-client:2.0.5
-  csi_driver: chubaofs/cfs-csi-driver:2.1.2
-  csi_provisioner: quay.io/k8scsi/csi-provisioner:v0.4.2 
-  driver_registrar: quay.io/k8scsi/driver-registrar:v0.4.2
-  csi_attacher: quay.io/k8scsi/csi-attacher:v0.4.2
+  server: chubaofs/cfs-server:2.0.6
+  client: chubaofs/cfs-client:2.0.6
+  csi_driver: chubaofs/cfs-csi-driver:3.0.1
+  csi_provisioner: quay.io/k8scsi/csi-provisioner:v1.6.0
+  driver_registrar: quay.io/k8scsi/csi-node-driver-registrar:v1.3.0
+  csi_attacher: quay.io/k8scsi/csi-attacher:v2.0.0
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
@@ -131,6 +132,20 @@ provisioner:
   owner: csiuser
   log_level: info
   kubelet_path: /var/lib/kubelet
+
+console: 
+  replicas: 1
+  log_level: info
+  port: 1602 
+  host: console.chubaofs.com
+  resources:
+    enabled: false
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1024Mi"
+      cpu: "1000m"
 
 consul:
   port: 8500
