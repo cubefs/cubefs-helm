@@ -13,7 +13,7 @@ jq -n \
   --arg prometheusAddr "$CBFS_PROMETHEUS_ADDR" \
     '{
   "role": "console",
-  "logDir": "/cfs/log/",
+  "logDir": "/cfs/logs/",
   "logLevel": $logLevel,
   "listen": $port,
   "master_instance": $masterAddr,
