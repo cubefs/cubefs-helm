@@ -32,7 +32,7 @@ master-service.{{- $.Values.namespace -}}.svc.cluster.local
 
 {{- define "chubaofs.monitor.consul.address" -}}
 {{- $envAll := index . 0 -}}
-consul-service.{{- $envAll.Values.namespace -}}.svc.cluster.local:{{- $envAll.Values.consul.port }}
+http://consul-service.{{- $envAll.Values.namespace -}}.svc.cluster.local:{{- $envAll.Values.consul.port }}
 {{- end -}}
 
 {{- define "chubaofs.monitor.consul.url" -}}

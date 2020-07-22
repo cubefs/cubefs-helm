@@ -58,9 +58,7 @@ spec:
           imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
-          command:
-            - /bin/tini
-            - "--"
+          args:
             - bash
             - "-c"
             - |-
