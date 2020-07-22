@@ -17,6 +17,12 @@ spec:
        - backend:
           serviceName: grafana-service
           servicePort: {{ .Values.grafana.port }}
+   - host: {{ .Values.console.host }}
+     http:
+       paths:
+       - backend:
+          serviceName: console-service
+          servicePort: {{ .Values.console.port }}
    - host: {{ .Values.objectnode.host }}
      http:
        paths:

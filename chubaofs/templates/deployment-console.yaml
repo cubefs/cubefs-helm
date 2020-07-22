@@ -1,0 +1,95 @@
+{{- if .Values.component.console }}
+{{- $envAll := . }}
+{{- $namespace := .Values.namespace }}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: console
+  labels:
+{{ tuple $envAll $namespace "console" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ .Values.console.replicas }}
+  selector:
+    matchLabels:
+{{ tuple $envAll $namespace "console" | include "helm-toolkit.metadata_labels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $namespace "console" | include "helm-toolkit.metadata_labels" | indent 8 }}
+    spec:
+      initContainers:
+        - name: check-master-service
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command: [ "/bin/bash", "/cfs/bin/check-master-service.sh" ]
+          env:
+            - name: CBFS_MASTER_SERVICE_PORT
+              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/check-master-service.sh
+              subPath: check-master-service.sh
+              readOnly: true
+        - name: init-config
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          command: [ "/bin/bash", "/cfs/bin/config-console.sh" ]
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: CBFS_OBJECTNODE_PORT
+              value: {{ .Values.console.port | quote }}
+            - name: CBFS_OBJECTNODE_LOG_LEVEL
+              value: {{ .Values.console.log_level | quote }}
+            - name: CBFS_MASTER_ADDR
+              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+            - name: CBFS_MASTER_ADDRS
+              value: {{ include "chubaofs.master.address.array" . | quote }}
+            - name: CBFS_CLUSTER_NAME
+              value: {{ .Values.master.cluster  }}
+            - name: CBFS_PROMETHEUS_ADDR
+              value: {{ tuple $envAll | include "chubaofs.monitor.prometheus.url" | quote }}
+            - name: OBJECT_NODE_DOMAIN
+              value: {{ .Values.console.host }}
+            - name: CBFS_GRAFANA_URL
+              value: {{ .Values.grafana.host }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/config-console.sh
+              subPath: config-console.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /cfs/conf
+      containers:
+        - name: console-pod
+          image: {{ $.Values.image.server }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/bash", "/cfs/bin/start.sh" ]
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+{{ tuple $envAll "port" .Values.console.port | include "helm-toolkit.utils.container_port" | indent 12 }}
+          volumeMounts:
+            - name: chubaofs-bin
+              mountPath: /cfs/bin/start.sh
+              subPath: start-console.sh
+              readOnly: true
+            - name: chubaofs-conf
+              mountPath: /cfs/conf
+{{ tuple $envAll $envAll.Values.console.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+      volumes:
+        - name: chubaofs-bin
+          configMap:
+            name: chubaofs-bin
+            defaultMode: 0555
+        - name: chubaofs-conf
+          emptyDir: {}
+{{ end }}
+
+
+
+
+

@@ -97,7 +97,7 @@ spec:
               mountPath: /cfs/data
               readOnly: false
             {{- end }}
-{{ tuple $envAll $envAll.Values.metanode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ tuple $envAll $envAll.Values.master.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
         - name: chubaofs-bin
           configMap:
