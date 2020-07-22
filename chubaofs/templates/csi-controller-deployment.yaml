@@ -67,9 +67,7 @@ spec:
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
-          command:
-            - /bin/tini
-            - "--"
+          args:
             - bash
             - "-c"
             - |-
