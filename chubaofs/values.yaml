@@ -34,7 +34,7 @@ master:
   replicas: 3
   cluster: my-cluster
   labels:
-    node_selector_key: chuabaofs-master
+    node_selector_key: chubaofs-master
     node_selector_value: enabled
   log_level: info
   retain_logs: 2000
@@ -53,7 +53,7 @@ master:
 
 metanode:
   labels:
-    node_selector_key: chuabaofs-metanode
+    node_selector_key: chubaofs-metanode
     node_selector_value: enabled
   log_level: info
   total_mem: "26843545600"
@@ -73,7 +73,7 @@ metanode:
 
 datanode:
   labels:
-    node_selector_key: chuabaofs-datanode
+    node_selector_key: chubaofs-datanode
     node_selector_value: enabled
   log_level: info
   port: 17310 

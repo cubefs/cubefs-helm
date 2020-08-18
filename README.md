@@ -55,9 +55,9 @@ provisioner:
 You should tag each Kubernetes node with the appropriate labels accorindly for server node and CSI node of ChubaoFS.
 
 ```
-kubectl label node <nodename> chuabaofs-master=enabled
-kubectl label node <nodename> chuabaofs-metanode=enabled
-kubectl label node <nodename> chuabaofs-datanode=enabled
+kubectl label node <nodename> chubaofs-master=enabled
+kubectl label node <nodename> chubaofs-metanode=enabled
+kubectl label node <nodename> chubaofs-datanode=enabled
 kubectl label node <nodename> chubaofs-csi-node=enabled
 ```
 
