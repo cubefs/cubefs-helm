@@ -23,6 +23,7 @@ spec:
       nodeSelector:
         {{ $.Values.master.labels.node_selector_key }}: {{ $.Values.master.labels.node_selector_value }}
       hostNetwork: true
+      priorityClassName: chubaofs-high-priority
       hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
