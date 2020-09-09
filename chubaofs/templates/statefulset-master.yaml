@@ -10,6 +10,8 @@ metadata:
 {{ tuple $envAll $namespace "master" | include "helm-toolkit.metadata_labels" | indent 4 }}
   namespace: {{ $namespace }}
 spec:
+  updateStrategy:
+    type: OnDelete
   replicas: {{ .Values.master.replicas }}
   serviceName: master-service
   selector:

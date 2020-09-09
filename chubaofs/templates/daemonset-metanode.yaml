@@ -10,6 +10,8 @@ metadata:
 {{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 4 }}
   namespace: {{ $namespace }}
 spec:
+  updateStrategy:
+    type: OnDelete
   selector:
     matchLabels:
 {{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 6 }}
