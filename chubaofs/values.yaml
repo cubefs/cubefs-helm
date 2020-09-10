@@ -129,7 +129,6 @@ client:
 
 provisioner:
   dirver_name: csi.chubaofs.com
-  owner: csiuser
   log_level: error
   kubelet_path: /var/lib/kubelet
 
