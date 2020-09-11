@@ -15,8 +15,6 @@ parameters:
   masterAddr: {{ include "chubaofs.master-service.with.port" . | quote }}
   # Consul Service IP address or URL
   consulAddr: {{ $consulAddress | quote }}
-  # Owner name as authentication
-  owner: {{ $.Values.provisioner.owner }}
   # Log level：debug, info, warn, error 
   logLevel: {{ $.Values.provisioner.log_level }}
 ---

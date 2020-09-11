@@ -1,11 +1,9 @@
 # chubaofs-helm Makefile 
 
-all: build
+package: lint
+	cp README.md chubaofs/ && helm package chubaofs && rm chubaofs/README.md
 
 lint:
 	helm lint ./chubaofs
 
-build: lint
-	helm package ./chubaofs
-
-.PHONY: all lint build
+.PHONY: package lint

@@ -6,7 +6,7 @@
 The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubernetes.
 
 ### Prerequisite 
-- Kubernetes 1.16+
+- Kubernetes 1.14+
 - CSI spec version 1.1.0
 - Helm 3
 
@@ -55,9 +55,9 @@ provisioner:
 You should tag each Kubernetes node with the appropriate labels accorindly for server node and CSI node of ChubaoFS.
 
 ```
-kubectl label node <nodename> chuabaofs-master=enabled
-kubectl label node <nodename> chuabaofs-metanode=enabled
-kubectl label node <nodename> chuabaofs-datanode=enabled
+kubectl label node <nodename> chubaofs-master=enabled
+kubectl label node <nodename> chubaofs-metanode=enabled
+kubectl label node <nodename> chubaofs-datanode=enabled
 kubectl label node <nodename> chubaofs-csi-node=enabled
 ```
 

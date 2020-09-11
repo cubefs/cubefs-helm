@@ -13,9 +13,9 @@ component:
   ingress: true
 
 image:
-  server: chubaofs/cfs-server:2.0.6
-  client: chubaofs/cfs-client:2.0.6
-  csi_driver: chubaofs/cfs-csi-driver:3.0.2
+  server: chubaofs/cfs-server:2.2.1
+  client: chubaofs/cfs-client:2.2.1
+  csi_driver: chubaofs/cfs-csi-driver:2.2.1.110.0
   csi_provisioner: quay.io/k8scsi/csi-provisioner:v1.6.0
   driver_registrar: quay.io/k8scsi/csi-node-driver-registrar:v1.3.0
   csi_attacher: quay.io/k8scsi/csi-attacher:v2.0.0
@@ -34,9 +34,9 @@ master:
   replicas: 3
   cluster: my-cluster
   labels:
-    node_selector_key: chuabaofs-master
+    node_selector_key: chubaofs-master
     node_selector_value: enabled
-  log_level: info
+  log_level: error
   retain_logs: 2000
   port: 17010 
   prof: 17020 
@@ -53,9 +53,9 @@ master:
 
 metanode:
   labels:
-    node_selector_key: chuabaofs-metanode
+    node_selector_key: chubaofs-metanode
     node_selector_value: enabled
-  log_level: info
+  log_level: error
   total_mem: "26843545600"
   port: 17210 
   prof: 17220 
@@ -73,9 +73,9 @@ metanode:
 
 datanode:
   labels:
-    node_selector_key: chuabaofs-datanode
+    node_selector_key: chubaofs-datanode
     node_selector_value: enabled
-  log_level: info
+  log_level: error
   port: 17310 
   prof: 17320 
   raft_heartbeat: 17330 
@@ -95,7 +95,7 @@ datanode:
 
 objectnode:
   replicas: 3
-  log_level: info
+  log_level: error
   port: 1601 
   prof: 7011
   exporter_port: 9500
@@ -115,7 +115,7 @@ client:
   replicas: 1
   vol_name: "test"
   owner: "chubaofs"
-  log_level: info
+  log_level: error
   exporter_port: 9530
   prof: 17410 
   resources:
@@ -129,13 +129,12 @@ client:
 
 provisioner:
   dirver_name: csi.chubaofs.com
-  owner: csiuser
-  log_level: info
+  log_level: error
   kubelet_path: /var/lib/kubelet
 
 console: 
   replicas: 1
-  log_level: info
+  log_level: error
   port: 1602 
   host: console.chubaofs.com
   resources:
