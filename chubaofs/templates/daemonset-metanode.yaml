@@ -10,6 +10,8 @@ metadata:
 {{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 4 }}
   namespace: {{ $namespace }}
 spec:
+  updateStrategy:
+    type: OnDelete
   selector:
     matchLabels:
 {{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 6 }}
@@ -21,6 +23,7 @@ spec:
       nodeSelector:
         {{ $.Values.metanode.labels.node_selector_key }}: {{ $.Values.metanode.labels.node_selector_value }}
       hostNetwork: true
+      priorityClassName: chubaofs-high-priority
       hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:

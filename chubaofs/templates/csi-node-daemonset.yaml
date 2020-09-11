@@ -19,6 +19,7 @@ spec:
         app: cfs-csi-node
     spec:
       serviceAccount: cfs-csi-service-account
+      priorityClassName: chubaofs-high-priority
       nodeSelector:
         chubaofs-csi-node: enabled
       containers:
