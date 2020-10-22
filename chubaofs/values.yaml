@@ -13,9 +13,9 @@ component:
   ingress: true
 
 image:
-  server: chubaofs/cfs-server:2.2.1
-  client: chubaofs/cfs-client:2.2.1
-  csi_driver: chubaofs/cfs-csi-driver:2.2.1.030.0
+  server: chubaofs/cfs-server:2.2.2
+  client: chubaofs/cfs-client:2.2.2
+  csi_driver: chubaofs/cfs-csi-driver:2.2.2.030.0
   csi_provisioner: quay.io/k8scsi/csi-provisioner:v0.4.2 
   driver_registrar: quay.io/k8scsi/driver-registrar:v0.4.2
   csi_attacher: quay.io/k8scsi/csi-attacher:v0.4.2
@@ -31,7 +31,7 @@ path:
   monitor: /var/lib/chubaofs_prometheus
 
 master:
-  replicas: 3
+  replicas: 4
   cluster: my-cluster
   labels:
     node_selector_key: chubaofs-master

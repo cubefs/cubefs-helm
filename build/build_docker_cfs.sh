@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 RootPath=$(cd $(dirname $0); pwd)
-Version="2.0.0"
+Version="0.0.1"
 if [[ -n "$1" ]] ;then
         # docker image tag of ChubaoFS
     Version=$1
