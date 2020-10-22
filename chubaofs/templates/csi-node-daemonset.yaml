@@ -92,7 +92,7 @@ spec:
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - mountPath: /var/lib/kubelet/pods
+            - mountPath: {{ $.Values.provisioner.kubelet_path -}}/pods
               mountPropagation: Bidirectional
               name: mountpoint-dir
       volumes:
