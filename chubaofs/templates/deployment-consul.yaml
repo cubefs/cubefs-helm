@@ -28,6 +28,8 @@ spec:
           env:
             - name: TZ
               value: Asia/Shanghai
+            - name: CONSUL_LOCAL_CONFIG
+              value: "{\"ports\": {\"http\": {{.Values.consul.port}} }}" 
           ports:
 {{ tuple $envAll "port" .Values.consul.port | include "helm-toolkit.utils.container_port" | indent 12 }}
 {{ tuple $envAll $envAll.Values.consul.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}

@@ -5,6 +5,15 @@
 
 The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubernetes.
 
+**ChubaoFS Components**
+
+<div width="100%" style="text-align:center;"><img alt="ChubaoFS Components" src="assets/chubaofs-component.jpg" width="700"/></div>
+
+
+**ChubaoFS Deployment**
+
+<div width="100%" style="text-align:center;"><img alt="ChubaoFS Deployment" src="assets/chubaofs-deployment.jpg" width="700"/></div>
+
 ### Prerequisite 
 - Kubernetes 1.12+
 - CSI spec version 0.3.0

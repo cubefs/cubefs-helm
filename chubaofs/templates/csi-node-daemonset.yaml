@@ -34,6 +34,8 @@ spec:
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
             - --kubeconfig=/etc/kubernetes/config
           env:
+            - name: TZ
+              value: Asia/Shanghai
             - name: ADDRESS
               value: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.chubaofs.com/csi.sock
             - name: DRIVER_REG_SOCK_PATH
@@ -89,7 +91,7 @@ spec:
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - mountPath: /var/lib/kubelet/pods
+            - mountPath: {{ $.Values.provisioner.kubelet_path -}}/pods
               mountPropagation: Bidirectional
               name: mountpoint-dir
             - name: kube-config
