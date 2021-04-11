@@ -1,4 +1,5 @@
 
+createNamespace: true
 namespace: chubaofs
 
 component:

@@ -9,7 +9,6 @@ keywords:
   - chubaofs
   - chubaofs-helm
   - chubaofs-csi
-home: https://chubao.io
 sources:
   - https://github.com/chubaofs/chubaofs-helm
 icon: https://raw.githubusercontent.com/chubaofs/chubaofs-helm/master/assets/chubaofs-logo.png
