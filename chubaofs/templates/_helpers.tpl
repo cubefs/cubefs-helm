@@ -12,37 +12,37 @@ Expand the name of the chart.
 
 {{- define "chubaofs.master.peers" -}}
 {{- range $i, $e := until (.Values.master.replicas | int) -}}
-{{ if ne $i 0 }},{{ end }}{{ $i | add1 }}:master-{{ $i }}.master-service.{{- $.Values.namespace -}}.svc.cluster.local:{{- $.Values.master.port -}}
+{{ if ne $i 0 }},{{ end }}{{ $i | add1 }}:master-{{ $i }}.master-service:{{- $.Values.master.port -}}
 {{- end -}}
 {{- end -}}
 
 {{- define "chubaofs.master-service.with.port" -}}
-master-service.{{- $.Values.namespace -}}.svc.cluster.local:{{- $.Values.master.port -}}
+master-service:{{- $.Values.master.port -}}
 {{- end -}}
 
 {{- define "chubaofs.master-service" -}}
-master-service.{{- $.Values.namespace -}}.svc.cluster.local
+master-service
 {{- end -}}
 
 {{- define "chubaofs.master.address.array" -}}
 {{- range $i, $e := until (.Values.master.replicas | int) -}}
-{{ if ne $i 0 }},{{ end }}master-{{ $i }}.master-service.{{- $.Values.namespace -}}.svc.cluster.local:{{- $.Values.master.port -}}
+{{ if ne $i 0 }},{{ end }}master-{{ $i }}.master-service:{{- $.Values.master.port -}}
 {{- end -}}
 {{- end -}}
 
 {{- define "chubaofs.monitor.consul.address" -}}
 {{- $envAll := index . 0 -}}
-http://consul-service.{{- $envAll.Values.namespace -}}.svc.cluster.local:{{- $envAll.Values.consul.port }}
+http://consul-service:{{- $envAll.Values.consul.port }}
 {{- end -}}
 
 {{- define "chubaofs.monitor.consul.url" -}}
 {{- $envAll := index . 0 -}}
-http://consul-service.{{- $envAll.Values.namespace -}}.svc.cluster.local:{{- $envAll.Values.consul.port }}
+http://consul-service:{{- $envAll.Values.consul.port }}
 {{- end -}}
 
 {{- define "chubaofs.monitor.prometheus.url" -}}
 {{- $envAll := index . 0 -}}
-http://prometheus-service.{{- $envAll.Values.namespace -}}.svc.cluster.local:{{- $envAll.Values.prometheus.port }}
+http://prometheus-service:{{- $envAll.Values.prometheus.port }}
 {{- end -}}
 
 {{- define "chubaofs.datanode.disks" -}}
