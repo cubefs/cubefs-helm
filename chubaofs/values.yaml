@@ -177,3 +177,5 @@ prometheus:
       memory: "1024Mi"
       cpu: "1000m"
 
+storageClass:
+  default: false
