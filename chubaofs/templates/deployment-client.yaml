@@ -1,23 +1,23 @@
 {{- if .Values.component.client }}
 {{- $envAll := . }}
-{{- $namespace := .Values.namespace }}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: client
   labels:
-{{ tuple $envAll $namespace "client" | include "helm-toolkit.metadata_labels" | indent 4 }}
-  namespace: {{ $namespace }}
+{{ tuple $envAll .Release.Namespace "client" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  
 spec:
   replicas: {{ .Values.client.replicas }}
   selector:
     matchLabels:
-{{ tuple $envAll $namespace "client" | include "helm-toolkit.metadata_labels" | indent 6 }}
+{{ tuple $envAll .Release.Namespace "client" | include "helm-toolkit.metadata_labels" | indent 6 }}
   template:
     metadata:
       labels:
-{{ tuple $envAll $namespace "client" | include "helm-toolkit.metadata_labels" | indent 8 }}
+{{ tuple $envAll .Release.Namespace "client" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
       initContainers:
         - name: check-master-service

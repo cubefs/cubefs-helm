@@ -72,7 +72,7 @@ kubectl label node <nodename> chubaofs-csi-node=enabled
 
 ### Deploy ChubaoFS cluster
 ```
-$ helm install chubaofs ./chubaofs -f ~/chubaofs.yaml
+$ helm upgrade --install chubaofs ./chubaofs -f ~/chubaofs.yaml -n chubaofs --create-namespace
 ```
 
 The output of `helm install` shows servers to be deployed.

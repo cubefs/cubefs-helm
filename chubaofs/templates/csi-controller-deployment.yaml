@@ -1,12 +1,11 @@
 {{- if .Values.component.provisioner }}
 {{- $envAll := . }}
-{{- $namespace := .Values.namespace }}
+
 ---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: cfs-csi-controller
-  namespace: {{ $namespace }}
 spec:
   selector:
     matchLabels:

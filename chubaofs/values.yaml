@@ -1,7 +1,4 @@
 
-createNamespace: true
-namespace: chubaofs
-
 component:
   master: true
   datanode: true

@@ -1,24 +1,24 @@
 {{- if .Values.component.metanode }}
 {{- $envAll := . }}
-{{- $namespace := .Values.namespace }}
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: metanode
   labels:
-{{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 4 }}
-  namespace: {{ $namespace }}
+{{ tuple $envAll .Release.Namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  
 spec:
   updateStrategy:
     type: OnDelete
   selector:
     matchLabels:
-{{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 6 }}
+{{ tuple $envAll .Release.Namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 6 }}
   template:
     metadata:
       labels:
-{{ tuple $envAll $namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 8 }}
+{{ tuple $envAll .Release.Namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
       nodeSelector:
         {{ $.Values.metanode.labels.node_selector_key }}: {{ $.Values.metanode.labels.node_selector_value }}

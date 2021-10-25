@@ -1,14 +1,14 @@
 {{- if .Values.component.master }}
 {{- $envAll := . }}
-{{- $namespace := .Values.namespace }}
+
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: master
   labels:
-{{ tuple $envAll $namespace "master" | include "helm-toolkit.metadata_labels" | indent 4 }}
-  namespace: {{ $namespace }}
+{{ tuple $envAll .Release.Namespace "master" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  
 spec:
   updateStrategy:
     type: OnDelete
@@ -16,11 +16,11 @@ spec:
   serviceName: master-service
   selector:
     matchLabels:
-{{ tuple $envAll $namespace "master" | include "helm-toolkit.metadata_labels" | indent 6 }}
+{{ tuple $envAll .Release.Namespace "master" | include "helm-toolkit.metadata_labels" | indent 6 }}
   template:
     metadata:
       labels:
-{{ tuple $envAll $namespace "master" | include "helm-toolkit.metadata_labels" | indent 8 }}
+{{ tuple $envAll .Release.Namespace "master" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
       nodeSelector:
         {{ $.Values.master.labels.node_selector_key }}: {{ $.Values.master.labels.node_selector_value }}

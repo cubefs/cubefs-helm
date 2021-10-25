@@ -1,23 +1,23 @@
 {{- if .Values.component.console }}
 {{- $envAll := . }}
-{{- $namespace := .Values.namespace }}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: console
   labels:
-{{ tuple $envAll $namespace "console" | include "helm-toolkit.metadata_labels" | indent 4 }}
-  namespace: {{ $namespace }}
+{{ tuple $envAll .Release.Namespace "console" | include "helm-toolkit.metadata_labels" | indent 4 }}
+  
 spec:
   replicas: {{ .Values.console.replicas }}
   selector:
     matchLabels:
-{{ tuple $envAll $namespace "console" | include "helm-toolkit.metadata_labels" | indent 6 }}
+{{ tuple $envAll .Release.Namespace "console" | include "helm-toolkit.metadata_labels" | indent 6 }}
   template:
     metadata:
       labels:
-{{ tuple $envAll $namespace "console" | include "helm-toolkit.metadata_labels" | indent 8 }}
+{{ tuple $envAll .Release.Namespace "console" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
       initContainers:
         - name: check-master-service
