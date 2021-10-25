@@ -1,22 +1,20 @@
 {{- if .Values.component.provisioner }}
 {{- $envAll := . }}
-{{- $namespace := .Values.namespace }}
+
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cfs-csi-service-account
-  namespace: {{ $namespace }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cfs-csi-cluster-role-binding
-  namespace: {{ $namespace }}
 subjects:
   - kind: ServiceAccount
     name: cfs-csi-service-account
-    namespace: {{ $namespace }}
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: cfs-csi-cluster-role
@@ -26,7 +24,6 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cfs-csi-cluster-role
-  namespace: {{ $namespace }}
 rules:
   - apiGroups: [""]
     resources: ["nodes"]
@@ -54,7 +51,6 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cfs-csi-role
-  namespace: {{ $namespace }}
 rules:
   - apiGroups: [""]
     resources: ["endpoints"]
@@ -70,11 +66,9 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cfs-csi-role-binding
-  namespace: {{ $namespace }}
 subjects:
   - kind: ServiceAccount
     name: cfs-csi-service-account
-    namespace: {{ $namespace }}
 roleRef:
   kind: Role
   name: cfs-csi-role

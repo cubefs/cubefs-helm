@@ -1,12 +1,11 @@
 {{- if .Values.component.provisioner }}
 {{- $envAll := . }}
-{{- $namespace := .Values.namespace }}
+
 ---
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
   name: cfs-csi-node
-  namespace: {{ $namespace }}
 spec:
   updateStrategy:
     type: OnDelete

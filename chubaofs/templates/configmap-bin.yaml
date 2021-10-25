@@ -4,7 +4,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: chubaofs-bin
-  namespace: {{ .Values.namespace }}
 data:
 {{- if .Values.component.master }}
   config-master.sh: |+
