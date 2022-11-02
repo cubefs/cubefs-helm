@@ -37,7 +37,11 @@ http://consul-service:{{- $envAll.Values.consul.port }}
 
 {{- define "chubaofs.monitor.consul.url" -}}
 {{- $envAll := index . 0 -}}
-http://consul-service:{{- $envAll.Values.consul.port }}
+{{- if $envAll.Values.consul.external_address -}}
+{{$envAll.Values.consul.external_address}}
+{{- else -}}
+http://consul-service:{{$envAll.Values.consul.port }}
+{{- end -}}
 {{- end -}}
 
 {{- define "chubaofs.monitor.prometheus.url" -}}
@@ -55,9 +59,9 @@ http://prometheus-service:{{- $envAll.Values.prometheus.port }}
 {{- $envAll := index . 0 -}}
 {{- $application := index . 1 -}}
 {{- $component := index . 2 -}}
-application: {{ $application }}
-component: {{ $component }}
-app_version: {{ $envAll.Chart.Version }}
+app.kubernetes.io/name: {{ $application }}
+app.kubernetes.io/component: {{ $component }}
+app.kubernetes.io/version: {{ $envAll.Chart.Version }}
 {{- end -}}
 
 {{- define "helm-toolkit.utils.template" -}}
@@ -112,3 +116,9 @@ resources:
   readOnly: false
 {{- end }}
 {{- end }}
+
+
+{{/* Support override kubernetes version */}}
+{{- define "cubefs.kubernetes.version" -}}
+  {{- default .Capabilities.KubeVersion.Version .Values.kubernetes.version -}}
+{{- end -}}

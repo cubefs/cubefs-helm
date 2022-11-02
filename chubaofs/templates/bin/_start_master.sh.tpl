@@ -6,4 +6,4 @@ mkdir -p /cfs/data/master/rocksdbstore
 
 cat /cfs/conf/master.json
 echo "start master"
-/cfs/bin/cfs-server -f -c /cfs/conf/master.json
+exec /cfs/bin/cfs-server -f {{ if .Values.log.do_not_redirect_std -}} -redirect-std=false {{- end }} -c /cfs/conf/master.json

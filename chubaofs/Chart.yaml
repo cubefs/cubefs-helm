@@ -3,8 +3,8 @@ name: chubaofs
 description: A Helm chart for ChubaoFS
 home: https://chubao.io
 kubeVersion: ">=1.14.6-23.3d03dd1"
-version: 2.2.1 
-appVersion: 2.2.1.110.0
+version: 3.2.0
+appVersion: 3.2.0.110.0
 keywords:
   - chubaofs
   - chubaofs-helm

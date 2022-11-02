@@ -30,6 +30,10 @@ jq -n \
     "disks": $disks
 }' | jq '.masterAddr |= split(",")' | jq '.disks |= split(",")' > /cfs/conf/datanode.json
 
+# merge the override config
+jq -s ".[0] + .[1].\"$CBFS_DATANODE_LOCALIP\"" /cfs/conf/datanode.json /cfs/conf-override/datanode.json > tmp.json
+mv tmp.json /cfs/conf/datanode.json
+
 cat /cfs/conf/datanode.json
 echo "configuration finished"
 

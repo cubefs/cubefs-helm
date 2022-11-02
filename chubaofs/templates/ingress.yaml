@@ -2,31 +2,81 @@
 {{- $envAll := . }}
 
 ---
+{{- if semverCompare "<1.19.0" (include "cubefs.kubernetes.version" .) }}
 apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: networking.k8s.io/v1
+{{- end }}
 kind: Ingress
 metadata:
-  name: ingress
-  
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
+  name: cubefs-ingress
 spec:
   rules:
-   - host: {{ .Values.grafana.host }}
-     http:
-       paths:
-       - backend:
-          serviceName: grafana-service
-          servicePort: {{ .Values.grafana.port }}
-   - host: {{ .Values.console.host }}
-     http:
-       paths:
-       - backend:
-          serviceName: console-service
-          servicePort: {{ .Values.console.port }}
-   - host: {{ .Values.objectnode.host }}
-     http:
-       paths:
-       - backend:
-          serviceName: objectnode-service
-          servicePort: {{ .Values.objectnode.port }}
+{{- if semverCompare "<1.19.0" (include "cubefs.kubernetes.version" .) }}
+    - host: {{ .Values.master.host }}
+      http:
+        paths:
+          - backend:
+              serviceName: master-service
+              servicePort: {{ .Values.master.port }}
+    - host: {{ .Values.grafana.host }}
+      http:
+        paths:
+          - backend:
+              serviceName: grafana-service
+              servicePort: {{ .Values.grafana.port }}
+    - host: {{ .Values.console.host }}
+      http:
+        paths:
+          - backend:
+              serviceName: console-service
+              servicePort: {{ .Values.console.port }}
+    - host: {{ .Values.objectnode.host }}
+      http:
+        paths:
+          - backend:
+              serviceName: objectnode-service
+              servicePort: {{ .Values.objectnode.port }}
+{{- else }}
+    - host: {{ .Values.master.host }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: master-service
+                port:
+                  number: {{ .Values.master.port }}
+            path: /
+            pathType: Prefix
+    - host: {{ .Values.grafana.host }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: grafana-service
+                port:
+                  number: {{ .Values.grafana.port }}
+            path: /
+            pathType: Prefix
+    - host: {{ .Values.console.host }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: console-service
+                port:
+                  number: {{ .Values.console.port }}
+            path: /
+            pathType: Prefix
+    - host: {{ .Values.objectnode.host }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: objectnode-service
+                port:
+                  number: {{ .Values.objectnode.port }}
+            path: /
+            pathType: Prefix
+{{- end }}
 {{ end }}

@@ -9,7 +9,7 @@ do
   if [ "X"$clusterInfo == "X" ]; then
     code=1
     echo "waiting master service"
-    sleep 5s
+    sleep 2s
   else
     echo $clusterInfo | jq "."
     code=$( echo "$clusterInfo" | jq ".code" )

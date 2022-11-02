@@ -1,4 +1,4 @@
-
+# Select which component to install
 component:
   master: true
   datanode: true
@@ -7,8 +7,13 @@ component:
   client: true
   provisioner: true
   monitor: true
-  console: true
+  # The console component was deprecated.
+  console: false
   ingress: true
+
+# Allow to override kubernetes version
+kubernetes:
+  version: ""
 
 image:
   server: chubaofs/cfs-server:2.4.0
@@ -22,23 +27,36 @@ image:
   consul: consul:1.6.1
   pull_policy: "IfNotPresent"
 
-# store data,log and other data 
+log:
+  # Do not redirect the standard output into a file, recommend to
+  # set to true, but cfs-server version > 3.2.0 was required
+  do_not_redirect_std: false
+
+# store data,log and other data, these directory will be
+#  mounted from host to container using hostPath
 path:
   data: /var/lib/chubaofs
   log: /var/log/chubaofs
   monitor: /var/lib/chubaofs_prometheus
 
 master:
-  replicas: 4
+  # The replicas of master component, at least 3, recommend to be an odd number
+  replicas: 3
+  # Cluster name
   cluster: my-cluster
-  labels:
-    node_selector_key: chubaofs-master
-    node_selector_value: enabled
+  # NodeSelector
+  nodeSelector:
+    "component.cubefs.io/master": "enabled"
+  tolerations: [ ]
+  host: master.chubaofs.com
   log_level: error
   retain_logs: 2000
-  port: 17010 
-  prof: 17020 
-  exporter_port: 9500 
+  # Master service http port
+  port: 17010
+  # Master golang pprof port
+  prof: 17020
+  exporter_port: 9500
+  # Reserved memory in bytes for each metanode, if available memory less than this value, the metanode will be unwritable
   metanode_reserved_mem: "67108864"
   resources:
     enabled: false
@@ -50,16 +68,19 @@ master:
       cpu: "8000m"
 
 metanode:
-  labels:
-    node_selector_key: chubaofs-metanode
-    node_selector_value: enabled
+  # NodeSelector for metanode daemonset
+  nodeSelector:
+    "component.cubefs.io/metanode": "enabled"
+  tolerations: [ ]
   log_level: error
+  # Total memory metanode can use, recommended to be configured
+  # as 80% of physical machine memory
   total_mem: "26843545600"
-  port: 17210 
-  prof: 17220 
-  raft_heartbeat: 17230 
+  port: 17210
+  prof: 17220
+  raft_heartbeat: 17230
   raft_replica: 17240
-  exporter_port: 9510 
+  exporter_port: 9510
   resources:
     enabled: true
     requests:
@@ -70,15 +91,21 @@ metanode:
       cpu: "8000m"
 
 datanode:
-  labels:
-    node_selector_key: chubaofs-datanode
-    node_selector_value: enabled
+  # NodeSelector for datanode daemonset
+  nodeSelector:
+    "component.cubefs.io/datanode": "enabled"
+  tolerations: [ ]
   log_level: error
-  port: 17310 
-  prof: 17320 
-  raft_heartbeat: 17330 
-  raft_replica: 17340 
+  port: 17310
+  prof: 17320
+  raft_heartbeat: 17330
+  raft_replica: 17340
   exporter_port: 9520
+  # Disks will be used by datanode to storage data
+  # Format: disk_mount_point:reserved_space
+  # disk_mount_point: the mount point of disk in machine
+  # reserved_space: similar to metanode reserved space, if disk available
+  # space less than this number, then the disk will be unwritable
   disks:
     - /data0:21474836480
     - /data1:21474836480
@@ -92,12 +119,18 @@ datanode:
       cpu: "8000m"
 
 objectnode:
+  # The replicas of object component, object node is stateless,
+  # it can be any number depending on your traffic magnitude.
   replicas: 3
   log_level: error
-  port: 1601 
+  port: 1601
   prof: 7011
   exporter_port: 9500
+  nodeSelector:
+    "component.cubefs.io/objectnode": "enabled"
+  tolerations: [ ]
   region: "spark"
+  # Domains listed here will be used in resolution of pan-domain names to parse bucket name
   domains: "objectcfs.jd.local,objectnode.cfs.jd.local"
   host: objectnode.chubaofs.com
   resources:
@@ -115,7 +148,7 @@ client:
   owner: "chubaofs"
   log_level: error
   exporter_port: 9530
-  prof: 17410 
+  prof: 17410
   resources:
     enabled: false
     requests:
@@ -130,10 +163,11 @@ provisioner:
   log_level: error
   kubelet_path: /var/lib/kubelet
 
-console: 
+console:
   replicas: 1
   log_level: error
-  port: 1602 
+  port: 1602
+  # Ingress host name
   host: console.chubaofs.com
   resources:
     enabled: false
@@ -146,11 +180,13 @@ console:
 
 consul:
   port: 8500
-  replicas: 1 
+  replicas: 1
+  external_address: ""
 
 grafana:
   port: 3000
   replicas: 1
+  # Ingress host name
   host: monitor.chubaofs.com
   admin_password: !!string 123456
   resources:

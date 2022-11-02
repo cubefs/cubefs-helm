@@ -5,4 +5,4 @@ mkdir -p /cfs/data/metanode/raft
 
 cat /cfs/conf/metanode.json
 echo "start master"
-/cfs/bin/cfs-server -f -c /cfs/conf/metanode.json
+exec /cfs/bin/cfs-server -f {{ if .Values.log.do_not_redirect_std -}} -redirect-std=false {{- end }} -c /cfs/conf/metanode.json
