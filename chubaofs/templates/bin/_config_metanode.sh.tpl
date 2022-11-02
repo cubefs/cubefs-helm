@@ -21,7 +21,7 @@ jq -n \
      "prof": $prof,
      "localIP": $localIP,
      "logLevel": $logLevel,
-     "metadataDir": "/cfs/data",
+     "metadataDir": "/cfs/data/metanode/meta",
      "logDir": "/cfs/logs",
      "raftDir": "/cfs/data/metanode/raft",
      "raftHeartbeatPort": $raftHeartbeatPort,
@@ -31,6 +31,10 @@ jq -n \
      "totalMem": $totalMem,
      "masterAddr": $masterAddrs
  }' | jq '.masterAddr |= split(",")' > /cfs/conf/metanode.json
+
+# merge the override config
+jq -s ".[0] + .[1].\"$CBFS_METANODE_LOCALIP\"" /cfs/conf/metanode.json /cfs/conf-override/metanode.json > tmp.json
+mv tmp.json /cfs/conf/metanode.json
 
 cat /cfs/conf/metanode.json
 echo "configuration finished"

@@ -8,7 +8,7 @@ metadata:
   name: metanode
   labels:
 {{ tuple $envAll .Release.Namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 4 }}
-  
+
 spec:
   updateStrategy:
     type: OnDelete
@@ -20,11 +20,18 @@ spec:
       labels:
 {{ tuple $envAll .Release.Namespace "metanode" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
+      terminationGracePeriodSeconds: 60
+    {{- with .Values.metanode.nodeSelector }}
       nodeSelector:
-        {{ $.Values.metanode.labels.node_selector_key }}: {{ $.Values.metanode.labels.node_selector_value }}
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      {{- with .Values.metanode.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+      {{- end }}
       hostNetwork: true
       priorityClassName: chubaofs-high-priority
-      hostPID: true
+      hostPID: false
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
         - name: check-master-service
@@ -73,6 +80,8 @@ spec:
               mountPath: /cfs/bin/config-metanode.sh
               subPath: config-metanode.sh
               readOnly: true
+            - name: cubefs-override
+              mountPath: /cfs/conf-override
             - name: chubaofs-conf
               mountPath: /cfs/conf
       containers:
@@ -91,6 +100,9 @@ spec:
 {{ tuple $envAll "raft-heartbeat" .Values.metanode.raft_heartbeat | include "helm-toolkit.utils.container_port" | indent 12 }}
 {{ tuple $envAll "raft-replica" .Values.metanode.raft_replica | include "helm-toolkit.utils.container_port" | indent 12 }}
 {{ tuple $envAll "exporter-port" .Values.metanode.exporter_port | include "helm-toolkit.utils.container_port" | indent 12 }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.metanode.port }}
           volumeMounts:
             - name: chubaofs-bin
               mountPath: /cfs/bin/start.sh
@@ -114,8 +126,12 @@ spec:
           configMap:
             name: chubaofs-bin
             defaultMode: 0555
+        - name: cubefs-override
+          configMap:
+            name: cubefs-config-override
+            defaultMode: 0555
         - name: chubaofs-conf
-          emptyDir: {}
+          emptyDir: { }
         {{- if $.Values.path.log }}
         - name: pod-log-path
           hostPath:

@@ -8,7 +8,7 @@ metadata:
   name: master
   labels:
 {{ tuple $envAll .Release.Namespace "master" | include "helm-toolkit.metadata_labels" | indent 4 }}
-  
+
 spec:
   updateStrategy:
     type: OnDelete
@@ -22,11 +22,33 @@ spec:
       labels:
 {{ tuple $envAll .Release.Namespace "master" | include "helm-toolkit.metadata_labels" | indent 8 }}
     spec:
+      terminationGracePeriodSeconds: 60
+    {{- with .Values.master.nodeSelector }}
       nodeSelector:
-        {{ $.Values.master.labels.node_selector_key }}: {{ $.Values.master.labels.node_selector_value }}
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.master.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      # Master can not deploy in a same node, port will conflict.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/application
+                    operator: In
+                    values:
+                      - {{ .Release.Namespace }}
+                  - key: app.kubernetes.io/component
+                    operator: In
+                    values:
+                      - "master"
+              topologyKey: kubernetes.io/hostname
       hostNetwork: true
       priorityClassName: chubaofs-high-priority
-      hostPID: true
+      hostPID: false
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
         - name: init-config
@@ -107,7 +129,7 @@ spec:
             name: chubaofs-bin
             defaultMode: 0555
         - name: chubaofs-conf
-          emptyDir: {}
+          emptyDir: { }
         {{- if $.Values.path.log }}
         - name: pod-log-path
           hostPath:
