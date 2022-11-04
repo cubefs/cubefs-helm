@@ -129,7 +129,7 @@ objectnode:
   tolerations: [ ]
   region: "spark"
   # Domains listed here will be used in resolution of pan-domain names to parse bucket name
-  domains: "objectcfs.jd.local,objectnode.cfs.jd.local"
+  domains: "objectcfs.cubefs.io,objectnode.cubefs.io"
   host: objectnode.cubefs.com
   resources:
     enabled: false
