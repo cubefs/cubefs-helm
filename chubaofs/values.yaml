@@ -7,8 +7,6 @@ component:
   client: true
   provisioner: true
   monitor: true
-  # The console component was deprecated.
-  console: false
   ingress: true
 
 # Allow to override kubernetes version
@@ -163,20 +161,6 @@ provisioner:
   log_level: error
   kubelet_path: /var/lib/kubelet
 
-console:
-  replicas: 1
-  log_level: error
-  port: 1602
-  # Ingress host name
-  host: console.chubaofs.com
-  resources:
-    enabled: false
-    requests:
-      memory: "512Mi"
-      cpu: "500m"
-    limits:
-      memory: "1024Mi"
-      cpu: "1000m"
 
 consul:
   port: 8500
