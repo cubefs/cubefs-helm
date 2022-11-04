@@ -510,7 +510,7 @@
         "#d44a3a"
       ],
       "datasource": null,
-      "description": "Chubaofs process start time of selected instance",
+      "description": "Cubefs process start time of selected instance",
       "format": "dateTimeFromNow",
       "gauge": {
         "maxValue": 100,
@@ -5661,8 +5661,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "chubaofs01",
-          "value": "chubaofs01"
+          "text": "cubefs01",
+          "value": "cubefs01"
         },
         "datasource": "Prometheus",
         "definition": "label_values(up{app=\"$app\"}, cluster)",
@@ -6566,7 +6566,7 @@
     ]
   },
   "timezone": "",
-  "title": "ChubaoFS",
+  "title": "Cubefs",
   "uid": "J8XJyOmZk1",
   "version": 1
 }

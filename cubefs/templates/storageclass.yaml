@@ -1,7 +1,7 @@
 {{- if .Values.component.provisioner }}
 {{- $envAll := . }}
 
-{{- $consulAddress := tuple $envAll | include "chubaofs.monitor.consul.address" }}
+{{- $consulAddress := tuple $envAll | include "cubefs.monitor.consul.address" }}
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -16,7 +16,7 @@ provisioner: {{ $.Values.provisioner.dirver_name }}
 reclaimPolicy: Delete
 parameters:
   # Resource manager IP address or URL
-  masterAddr: {{ include "chubaofs.master-service.with.port" . | quote }}
+  masterAddr: {{ include "cubefs.master-service.with.port" . | quote }}
   # Consul Service IP address or URL
   consulAddr: {{ $consulAddress | quote }}
   # Log level：debug, info, warn, error 

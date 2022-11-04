@@ -2,40 +2,40 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "chubaofs-helm.name" -}}
+{{- define "cubefs-helm.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "chubaofs-helm.namespace" -}}
+{{- define "cubefs-helm.namespace" -}}
 {{- .Release.Namespace | default .Values.namespace -}}
 {{- end -}}
 
-{{- define "chubaofs.master.peers" -}}
+{{- define "cubefs.master.peers" -}}
 {{- range $i, $e := until (.Values.master.replicas | int) -}}
 {{ if ne $i 0 }},{{ end }}{{ $i | add1 }}:master-{{ $i }}.master-service:{{- $.Values.master.port -}}
 {{- end -}}
 {{- end -}}
 
-{{- define "chubaofs.master-service.with.port" -}}
+{{- define "cubefs.master-service.with.port" -}}
 master-service:{{- $.Values.master.port -}}
 {{- end -}}
 
-{{- define "chubaofs.master-service" -}}
+{{- define "cubefs.master-service" -}}
 master-service
 {{- end -}}
 
-{{- define "chubaofs.master.address.array" -}}
+{{- define "cubefs.master.address.array" -}}
 {{- range $i, $e := until (.Values.master.replicas | int) -}}
 {{ if ne $i 0 }},{{ end }}master-{{ $i }}.master-service:{{- $.Values.master.port -}}
 {{- end -}}
 {{- end -}}
 
-{{- define "chubaofs.monitor.consul.address" -}}
+{{- define "cubefs.monitor.consul.address" -}}
 {{- $envAll := index . 0 -}}
 http://consul-service:{{- $envAll.Values.consul.port }}
 {{- end -}}
 
-{{- define "chubaofs.monitor.consul.url" -}}
+{{- define "cubefs.monitor.consul.url" -}}
 {{- $envAll := index . 0 -}}
 {{- if $envAll.Values.consul.external_address -}}
 {{$envAll.Values.consul.external_address}}
@@ -44,12 +44,12 @@ http://consul-service:{{$envAll.Values.consul.port }}
 {{- end -}}
 {{- end -}}
 
-{{- define "chubaofs.monitor.prometheus.url" -}}
+{{- define "cubefs.monitor.prometheus.url" -}}
 {{- $envAll := index . 0 -}}
 http://prometheus-service:{{- $envAll.Values.prometheus.port }}
 {{- end -}}
 
-{{- define "chubaofs.datanode.disks" -}}
+{{- define "cubefs.datanode.disks" -}}
 {{- range $i, $e := .Values.datanode.disks -}}
 {{ if ne $i 0 }},{{ end }}{{- $e -}}
 {{- end -}}

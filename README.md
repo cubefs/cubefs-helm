@@ -1,37 +1,37 @@
 
-# chubaofs-helm
+# cubefs-helm
 
-## Deploy ChubaoFS using Kubernetes and Helm
+## Deploy Cubefs using Kubernetes and Helm
 
-The chubaofs-helm project helps deploy a ChubaoFS cluster orchestrated by Kubernetes.
+The cubefs-helm project helps deploy a Cubefs cluster orchestrated by Kubernetes.
 
-**ChubaoFS Components**
+**Cubefs Components**
 
-<div width="100%" style="text-align:center;"><img alt="ChubaoFS Components" src="assets/chubaofs-component.jpg" width="700"/></div>
+<div width="100%" style="text-align:center;"><img alt="Cubefs Components" src="assets/cubefs-component.jpg" width="700"/></div>
 
 
-**ChubaoFS Deployment**
+**Cubefs Deployment**
 
-<div width="100%" style="text-align:center;"><img alt="ChubaoFS Deployment" src="assets/chubaofs-deployment.jpg" width="700"/></div>
+<div width="100%" style="text-align:center;"><img alt="Cubefs Deployment" src="assets/cubefs-deployment.jpg" width="700"/></div>
 
 ### Prerequisite 
 - Kubernetes 1.14+
 - CSI spec version 1.1.0
 - Helm 3
 
-### Download chubaofs-helm
+### Download cubefs-helm
 
 ```
-$ git clone https://github.com/chubaofs/chubaofs-helm
-$ cd chubaofs-helm
+$ git clone https://github.com/cubefs/cubefs-helm
+$ cd cubefs-helm
 ```
 
 ### Create configuration yaml file
 
-Create a `chubaofs.yaml` file, and put it in a user-defined path. Suppose this is where we put it.
+Create a `cubefs.yaml` file, and put it in a user-defined path. Suppose this is where we put it.
 
 ```
-$ vi ~/chubaofs.yaml 
+$ vi ~/cubefs.yaml 
 ```
 
 ``` yaml
@@ -41,8 +41,8 @@ component:
   ingress: false
 
 path:
-  data: /chubaofs/data
-  log: /chubaofs/log
+  data: /cubefs/data
+  log: /cubefs/log
 
 datanode:
   disks:
@@ -56,23 +56,23 @@ provisioner:
   kubelet_path: /var/lib/kubelet
 ```
 
-> Note that `chubaofs/values.yaml` shows all the config parameters of ChubaoFS.
+> Note that `cubefs/values.yaml` shows all the config parameters of Cubefs.
 > The parameters `path.data` and `path.log` are used to store server data and logs, respectively.
 
 ### Add labels to Kubernetes node
 
-You should tag each Kubernetes node with the appropriate labels accorindly for server node and CSI node of ChubaoFS.
+You should tag each Kubernetes node with the appropriate labels accorindly for server node and CSI node of Cubefs.
 
 ```
-kubectl label node <nodename> chubaofs-master=enabled
-kubectl label node <nodename> chubaofs-metanode=enabled
-kubectl label node <nodename> chubaofs-datanode=enabled
-kubectl label node <nodename> chubaofs-csi-node=enabled
+kubectl label node <nodename> cubefs-master=enabled
+kubectl label node <nodename> cubefs-metanode=enabled
+kubectl label node <nodename> cubefs-datanode=enabled
+kubectl label node <nodename> cubefs-csi-node=enabled
 ```
 
-### Deploy ChubaoFS cluster
+### Deploy Cubefs cluster
 ```
-$ helm upgrade --install chubaofs ./chubaofs -f ~/chubaofs.yaml -n chubaofs --create-namespace
+$ helm upgrade --install cubefs ./cubefs -f ~/cubefs.yaml -n cubefs --create-namespace
 ```
 
 The output of `helm install` shows servers to be deployed.
@@ -80,7 +80,7 @@ The output of `helm install` shows servers to be deployed.
 Use the following command to check pod status, which may take a few minutes.
 
 ```
-$ kubectl -n chubaofs get pods
+$ kubectl -n cubefs get pods
 NAME                         READY   STATUS    RESTARTS   AGE
 cfs-csi-controller-cfc7754b-ptvlq   3/3     Running   0          2m40s
 cfs-csi-node-q262p                  2/2     Running   0          2m40s
@@ -106,13 +106,13 @@ prometheus-6dcf97d7b-5v2xw          1/1     Running   0          2m40s
 Check cluster status
 
 ```
-helm status chubaofs
+helm status cubefs
 ```
 
-## Use ChubaoFS CSI as backend storage
+## Use Cubefs CSI as backend storage
 
-After installing ChubaoFS using helm, the StorageClass named `cfs-sc` of ChubaoFS has been created. Next, you can to create
-a PVC that the `storageClassName`  value is `cfs-sc` to using ChubaoFS as backend storage.
+After installing Cubefs using helm, the StorageClass named `cfs-sc` of Cubefs has been created. Next, you can to create
+a PVC that the `storageClassName`  value is `cfs-sc` to using Cubefs as backend storage.
 
 An example `pvc.yaml` is shown below.
 
@@ -153,7 +153,7 @@ spec:
         app: cfs-csi-demo-pod
     spec:
       nodeSelector:
-        chubaofs-csi-node: enabled
+        cubefs-csi-node: enabled
       containers:
         - name: cfs-csi-demo
           image: nginx:1.17.9
@@ -176,7 +176,7 @@ $ kubectl create -f deployment.yaml
 
 ## Config Monitoring System (optional)
 
-Monitor daemons are started if the cluster is deployed with chubaofs-helm. ChubaoFS uses Consul, Prometheus and Grafana to construct the monitoring system.
+Monitor daemons are started if the cluster is deployed with cubefs-helm. Cubefs uses Consul, Prometheus and Grafana to construct the monitoring system.
 
 Accessing the monitor dashboard requires Kubernetes Ingress Controller. In this example, the [Nginx Ingress](https://github.com/kubernetes/ingress-nginx) is used. Download the [default config yaml file](https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml), and add `hostNetwork: true` in the `spec` section.
 
@@ -206,23 +206,23 @@ ingress-nginx   nginx-ingress-controller-5bbd46cd86-q88sw    1/1     Running   0
 Get the host name of Grafana which should also be used as domain name.
 
 ```
-$ kubectl get ingress -n chubaofs
+$ kubectl get ingress -n cubefs
 NAME      HOSTS                  ADDRESS         PORTS   AGE
-grafana   monitor.chubaofs.com   10.106.207.55   80      24h
+grafana   monitor.cubefs.com   10.106.207.55   80      24h
 ```
 
 Add a local DNS in `/etc/hosts` in order for a request to find the ingress controller.
 
 ```
-10.196.31.101 monitor.chubaofs.com
+10.196.31.101 monitor.cubefs.com
 ```
 
-At this point, dashboard can be visited by `http://monitor.chubaofs.com`.
+At this point, dashboard can be visited by `http://monitor.cubefs.com`.
 
-## Uninstall ChubaoFS 
+## Uninstall Cubefs 
 
-uninstall ChubaoFS cluster using helm
+uninstall Cubefs cluster using helm
 
 ```
-helm delete chubaofs
+helm delete cubefs
 ```

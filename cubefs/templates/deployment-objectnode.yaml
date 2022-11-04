@@ -34,9 +34,9 @@ spec:
           command: [ "/bin/bash", "/cfs/bin/check-master-service.sh" ]
           env:
             - name: CBFS_MASTER_SERVICE_PORT
-              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+              value: {{ include "cubefs.master-service.with.port" . | quote }}
           volumeMounts:
-            - name: chubaofs-bin
+            - name: cubefs-bin
               mountPath: /cfs/bin/check-master-service.sh
               subPath: check-master-service.sh
               readOnly: true
@@ -54,7 +54,7 @@ spec:
             - name: CBFS_OBJECTNODE_LOG_LEVEL
               value: {{ .Values.objectnode.log_level | quote }}
             - name: CBFS_MASTER_ADDRS
-              value: {{ include "chubaofs.master.address.array" . | quote }}
+              value: {{ include "cubefs.master.address.array" . | quote }}
             - name: CBFS_OBJECTNODE_EXPORTER_PORT
               value: {{ .Values.objectnode.exporter_port | quote }}
             - name: CBFS_OBJECTNODE_REGION
@@ -62,11 +62,11 @@ spec:
             - name: CBFS_OBJECTNODE_DOMAINS
               value: {{ .Values.objectnode.domains }}
           volumeMounts:
-            - name: chubaofs-bin
+            - name: cubefs-bin
               mountPath: /cfs/bin/config-objectnode.sh
               subPath: config-objectnode.sh
               readOnly: true
-            - name: chubaofs-conf
+            - name: cubefs-conf
               mountPath: /cfs/conf
       containers:
         - name: objectnode-pod
@@ -83,19 +83,19 @@ spec:
 {{ tuple $envAll "prof" .Values.objectnode.prof | include "helm-toolkit.utils.container_port" | indent 12 }}
 {{ tuple $envAll "exporter-port" .Values.objectnode.exporter_port | include "helm-toolkit.utils.container_port" | indent 12 }}
           volumeMounts:
-            - name: chubaofs-bin
+            - name: cubefs-bin
               mountPath: /cfs/bin/start.sh
               subPath: start-objectnode.sh
               readOnly: true
-            - name: chubaofs-conf
+            - name: cubefs-conf
               mountPath: /cfs/conf
 {{ tuple $envAll $envAll.Values.objectnode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
-        - name: chubaofs-bin
+        - name: cubefs-bin
           configMap:
-            name: chubaofs-bin
+            name: cubefs-bin
             defaultMode: 0555
-        - name: chubaofs-conf
+        - name: cubefs-conf
           emptyDir: { }
 {{ end }}
 

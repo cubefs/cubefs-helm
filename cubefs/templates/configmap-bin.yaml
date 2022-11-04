@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: chubaofs-bin
+  name: cubefs-bin
 data:
 {{- if .Values.component.master }}
   config-master.sh: |+

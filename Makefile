@@ -1,9 +1,9 @@
-# chubaofs-helm Makefile 
+# cubefs-helm Makefile
 
 package: lint
-	cp README.md chubaofs/ && helm package chubaofs && rm chubaofs/README.md
+	cp README.md cubefs/ && helm package cubefs && rm cubefs/README.md
 
 lint:
-	helm lint ./chubaofs
+	helm lint ./cubefs
 
 .PHONY: package lint

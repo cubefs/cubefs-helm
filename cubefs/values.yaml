@@ -14,9 +14,9 @@ kubernetes:
   version: ""
 
 image:
-  server: chubaofs/cfs-server:2.4.0
-  client: chubaofs/cfs-client:2.4.0
-  csi_driver: chubaofs/cfs-csi-driver:2.4.0.110.4
+  server: cubefs/cfs-server:2.4.0
+  client: cubefs/cfs-client:2.4.0
+  csi_driver: cubefs/cfs-csi-driver:2.4.0.110.4
   csi_provisioner: quay.io/k8scsi/csi-provisioner:v1.6.0
   driver_registrar: quay.io/k8scsi/csi-node-driver-registrar:v1.3.0
   csi_attacher: quay.io/k8scsi/csi-attacher:v2.0.0
@@ -33,9 +33,9 @@ log:
 # store data,log and other data, these directory will be
 #  mounted from host to container using hostPath
 path:
-  data: /var/lib/chubaofs
-  log: /var/log/chubaofs
-  monitor: /var/lib/chubaofs_prometheus
+  data: /var/lib/cubefs
+  log: /var/log/cubefs
+  monitor: /var/lib/cubefs_prometheus
 
 master:
   # The replicas of master component, at least 3, recommend to be an odd number
@@ -46,7 +46,7 @@ master:
   nodeSelector:
     "component.cubefs.io/master": "enabled"
   tolerations: [ ]
-  host: master.chubaofs.com
+  host: master.cubefs.com
   log_level: error
   retain_logs: 2000
   # Master service http port
@@ -130,7 +130,7 @@ objectnode:
   region: "spark"
   # Domains listed here will be used in resolution of pan-domain names to parse bucket name
   domains: "objectcfs.jd.local,objectnode.cfs.jd.local"
-  host: objectnode.chubaofs.com
+  host: objectnode.cubefs.com
   resources:
     enabled: false
     requests:
@@ -143,7 +143,7 @@ objectnode:
 client:
   replicas: 1
   vol_name: "test"
-  owner: "chubaofs"
+  owner: "cubefs"
   log_level: error
   exporter_port: 9530
   prof: 17410
@@ -157,7 +157,7 @@ client:
       cpu: "1000m"
 
 provisioner:
-  dirver_name: csi.chubaofs.com
+  dirver_name: csi.cubefs.com
   log_level: error
   kubelet_path: /var/lib/kubelet
 
@@ -171,7 +171,7 @@ grafana:
   port: 3000
   replicas: 1
   # Ingress host name
-  host: monitor.chubaofs.com
+  host: monitor.cubefs.com
   admin_password: !!string 123456
   resources:
     enabled: false

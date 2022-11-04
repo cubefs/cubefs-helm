@@ -1,0 +1,17 @@
+apiVersion: v1
+name: cubefs
+description: A Helm chart for Cubefs
+home: https://chubao.io
+kubeVersion: ">=1.14.6-23.3d03dd1"
+version: 3.2.0
+appVersion: 3.2.0.110.0
+keywords:
+  - cubefs
+  - cubefs-helm
+  - cubefs-csi
+sources:
+  - https://github.com/cubefs/cubefs-helm
+icon: https://user-images.githubusercontent.com/12113219/178886968-9513e51e-393b-4af1-bd90-189593ee2012.png
+maintainers:
+- name: "Chengyu Liu"
+  email: chengyu_l@126.com

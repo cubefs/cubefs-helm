@@ -18,12 +18,12 @@ help() {
 
 Usage: ./start.sh [ -h | --help ] [ component ]
     -h, --help						show help info
-    $ROLE_MASTER						start ChubaoFS Master service
-    $ROLE_DATANODE						start ChubaoFS DataNode service
-    $ROLE_METANODE						start ChubaoFS MetaNode service
-    $ROLE_OBJECTNODE						start ChubaoFS ObjectNode service
-    $ROLE_CLIENT [masterAddr] [volName] [Owner]		start ChubaoFS Client service
-    check [masterAddr]				check ChubaoFS Master service status
+    $ROLE_MASTER						start Cubefs Master service
+    $ROLE_DATANODE						start Cubefs DataNode service
+    $ROLE_METANODE						start Cubefs MetaNode service
+    $ROLE_OBJECTNODE						start Cubefs ObjectNode service
+    $ROLE_CLIENT [masterAddr] [volName] [Owner]		start Cubefs Client service
+    check [masterAddr]				check Cubefs Master service status
 EOF
     exit 0
 }
@@ -98,7 +98,7 @@ function create_master_config() {
 	local retain_logs=${CBFS_RETAIN_LOGS:-2000}
 	local exporter_port=${CBFS_EXPORTER_PORT:-17150}
 	local log_level=${CBFS_LOG_LEVEL:-error}
-	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.chubaofs.svc.cluster.local:8500}
+	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.cubefs.svc.cluster.local:8500}
 	local metanode_reserved_mem=${CBFS_METANODE_RESERVED_MEM:-67108864}
 
 	jq -n \
@@ -145,7 +145,7 @@ function create_metanode_config() {
 	local raft_replica_port=${CBFS_RAFT_REPLICA_PORT:-17240}
 	local exporter_port=${CBFS_EXPORTER_PORT:-17250}
 	local total_mem=${CBFS_TOTAL_MEM:-1073741824}
-	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.chubaofs.svc.cluster.local:8500}
+	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.cubefs.svc.cluster.local:8500}
 
 	jq -n \
 	  --arg port "$port" \
@@ -191,7 +191,7 @@ function create_datanode_config() {
 	local raft_heartbeat_port=${CBFS_RAFT_HEARTBEAT_PORT:-17330}
 	local raft_replica_port=${CBFS_RAFT_REPLICA_PORT:-17340}
 	local exporter_port=${CBFS_EXPORTER_PORT:-17350}
-	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.chubaofs.svc.cluster.local:8500}
+	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.cubefs.svc.cluster.local:8500}
 
 	jq -n \
 	  --arg port "$port" \
@@ -236,7 +236,7 @@ function create_objectnode_config() {
 	local prof=${CBFS_PROF:-17520}
 	local log_level=${CBFS_LOG_LEVEL:-error}
 	local exporter_port=${CBFS_EXPORTER_PORT:-17550}
-	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.chubaofs.svc.cluster.local:8500}
+	local consul_addr=${CBFS_CONSUL_ADDR:-http://consul-service.cubefs.svc.cluster.local:8500}
 	
 	jq -n \
 	  --arg port "$port" \
@@ -297,7 +297,7 @@ function start_client() {
 	owner=${owner:-demouser}
 	print "args:$master_addr, $vol_name, $owner"
 	
-	# check chubaofs cluster status, then create a vol for testing
+	# check cubefs cluster status, then create a vol for testing
 	check_and_create_volume ${master_addr} ${vol_name} ${owner}
 
 	# before every start, config file must be regenerated
@@ -331,7 +331,7 @@ function check_and_create_volume() {
 	create_volume ${master_addr} ${vol_name} ${owner}
 }
 
-# Create a volume in the cluster of ChubaoFS
+# Create a volume in the cluster of Cubefs
 function create_volume {
 	local master_addr="$1"
 	local vol_name="$2"	
