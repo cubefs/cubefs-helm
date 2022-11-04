@@ -35,21 +35,36 @@ $ vi ~/cubefs.yaml
 ```
 
 ``` yaml
+# Select which component to install
 component:
-  provisioner: true
-  monitor: true
-  ingress: false
+  master: true
+  datanode: true
+  metanode: true
+  objectnode: true
+  client: false
+  provisioner: false
+  monitor: false
+  ingress: true
 
+# store data,log and other data, these directory will be
+#  mounted from host to container using hostPath
 path:
-  data: /cubefs/data
-  log: /cubefs/log
+  data: /var/lib/cubefs
+  log: /var/log/cubefs
 
 datanode:
+  # Disks will be used by datanode to storage data
+  # Format: disk_mount_point:reserved_space
+  # disk_mount_point: the mount point of disk in machine
+  # reserved_space: similar to metanode reserved space, if disk available
+  # space less than this number, then the disk will be unwritable
   disks:
     - /data0:21474836480
-    - /data1:21474836480 
+    - /data1:21474836480
 
 metanode:
+  # Total memory metanode can use, recommended to be configured
+  # as 80% of physical machine memory
   total_mem: "26843545600"
 
 provisioner:
@@ -64,9 +79,10 @@ provisioner:
 You should tag each Kubernetes node with the appropriate labels accorindly for server node and CSI node of Cubefs.
 
 ```
-kubectl label node <nodename> cubefs-master=enabled
-kubectl label node <nodename> cubefs-metanode=enabled
-kubectl label node <nodename> cubefs-datanode=enabled
+kubectl label node <nodename> component.cubefs.io/master=enabled
+kubectl label node <nodename> component.cubefs.io/metanode=enabled
+kubectl label node <nodename> component.cubefs.io/datanode=enabled
+kubectl label node <nodename> component.cubefs.io/objectnode=enabled
 kubectl label node <nodename> cubefs-csi-node=enabled
 ```
 
