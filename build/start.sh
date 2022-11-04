@@ -11,7 +11,6 @@ ROLE_MASTER="master"
 ROLE_METANODE="metanode"
 ROLE_DATANODE="datanode"
 ROLE_OBJECTNODE="objectnode"
-ROLE_CONSOLE="console"
 ROLE_CLIENT="client"
 
 help() {
@@ -23,7 +22,6 @@ Usage: ./start.sh [ -h | --help ] [ component ]
     $ROLE_DATANODE						start ChubaoFS DataNode service
     $ROLE_METANODE						start ChubaoFS MetaNode service
     $ROLE_OBJECTNODE						start ChubaoFS ObjectNode service
-    $ROLE_CONSOLE 						start ChubaoFS Console service
     $ROLE_CLIENT [masterAddr] [volName] [Owner]		start ChubaoFS Client service
     check [masterAddr]				check ChubaoFS Master service status
 EOF
@@ -261,46 +259,6 @@ function create_objectnode_config() {
 	 }' | jq '.masterAddr |= split(",")' | jq '.domains |= split(",")' > /cfs/conf/objectnode.json
 }
 
-function create_console_config() {
-	if [ 0$CBFS_MASTER_ADDRS == 0 ]; then
-		print "env CBFS_MASTER_ADDRS not exist"
-		exit 1
-	fi
-
-	if [ 0$OBJECT_NODE_DOMAIN == 0 ]; then
-		print "env OBJECT_NODE_DOMAIN not exist"
-		exit 1
-	fi
-	
-
-	local cluster_name=${CBFS_CLUSTER_NAME:-mycluster}
-	local port=${CBFS_PORT:-17610}
-	local log_level=${CBFS_LOG_LEVEL:-error}
-	local grafana_url=${CBFS_GRAFANA_URL:-http://monitor.chubaofs.com}
-	local prometheus_url=${CBFS_PROMETHEUS_ADDR:-http://prometheus-service.chubaofs.svc.cluster.local:9090}
-
-	jq -n \
-	  --arg port "$port" \
-	  --arg logLevel "$log_level" \
-	  --arg objectNodeDomain "$OBJECT_NODE_DOMAIN" \
-	  --arg masterAddrs "$CBFS_MASTER_ADDRS" \
-	  --arg grafanaUrl "$grafana_url" \
-	  --arg clusterName "$cluster_name" \
-	  --arg prometheusUrl "$prometheus_url" \
-	    '{
-	  "role": "console",
-	  "logDir": "/cfs/logs/",
-	  "logLevel": $logLevel,
-	  "listen": $port,
-	  "objectNodeDomain": $objectNodeDomain,
-	  "masterAddr": $masterAddrs,
-	  "monitor_addr": $prometheusUrl,
-	  "dashboard_addr": $grafanaUrl,
-	  "monitor_app": "cfs",
-	  "monitor_cluster": $clusterName
-	}' | jq '.masterAddr |= split(",")' > /cfs/conf/console.json
-}
-
 function start_master() {
 	# before every start, config file must be regenerated
 	create_master_config
@@ -323,12 +281,6 @@ function start_objectnode() {
 	# before every start, config file must be regenerated
 	create_objectnode_config
 	start_cfs_server $ROLE_OBJECTNODE
-}
-
-function start_console() {
-	# before every start, config file must be regenerated
-	create_console_config
-	start_cfs_server $ROLE_CONSOLE
 }
 
 function start_client() {
@@ -479,9 +431,6 @@ while [[ $# -ge 1 ]]; do
 			;;
 		$ROLE_OBJECTNODE ) 
 			start_objectnode
-			;;
-		$ROLE_CONSOLE ) 
-			start_console
 			;;
 		$ROLE_CLIENT ) 
 			start_client $*
