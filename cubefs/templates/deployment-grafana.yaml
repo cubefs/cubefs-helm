@@ -58,8 +58,8 @@ spec:
               mountPath: /etc/grafana/grafana.ini
               subPath: grafana.ini
             - name: monitor-config
-              mountPath: /etc/grafana/provisioning/dashboards/chubaofs.json
-              subPath: chubaofs.json
+              mountPath: /etc/grafana/provisioning/dashboards/cubefs.json
+              subPath: cubefs.json
             - name: monitor-config
               mountPath: /etc/grafana/provisioning/dashboards/dashboard.yml
               subPath: dashboard.yml

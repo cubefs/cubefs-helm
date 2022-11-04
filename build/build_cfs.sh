@@ -6,8 +6,8 @@ help() {
     cat <<EOF
 Usage: ./build_cfs.sh [ -b | --build ] [ -bc | --build-with-clean ] 
     -h, --help              	show help info
-    -b, --build             	build ChubaoFS server and client
-    -rb, --rebuild              clean and download ChubaoFS source code, then build ChubaoFS server and client
+    -b, --build             	build Cubefs server and client
+    -rb, --rebuild              clean and download Cubefs source code, then build Cubefs server and client
 EOF
     exit 0
 }
@@ -18,24 +18,24 @@ function print() {
 
 function clean() {
 	test -d ${RootPath}/bin && rm -rf ${RootPath}/bin
-	test -d ${RootPath}/chubaofs && rm -rf ${RootPath}/chubaofs
+	test -d ${RootPath}/cubefs && rm -rf ${RootPath}/cubefs
 }
 
 function clone {
-	git clone https://github.com/chubaofs/chubaofs.git ${RootPath}/chubaofs
+	git clone https://github.com/cubefs/cubefs.git ${RootPath}/cubefs
 }
 
 
 function compile() {
-	test -d ${RootPath}/chubaofs && cd ${RootPath}/chubaofs || (print "chubaofs source code not exists"; exit 1)
-	Out=`docker run -it --rm --privileged -v ${RootPath}/chubaofs:/root/go/src/github.com/chubaofs/chubaofs chubaofs/cfs-base:1.0.1 \
-	    /bin/bash -c 'cd /root/go/src/github.com/chubaofs/chubaofs && make build > build/build.out 2>&1 && echo 0 || echo 1'`
+	test -d ${RootPath}/cubefs && cd ${RootPath}/cubefs || (print "cubefs source code not exists"; exit 1)
+	Out=`docker run -it --rm --privileged -v ${RootPath}/cubefs:/root/go/src/github.com/cubefs/cubefs cubefs/cfs-base:1.0.1 \
+	    /bin/bash -c 'cd /root/go/src/github.com/cubefs/cubefs && make build > build/build.out 2>&1 && echo 0 || echo 1'`
 	if [[ "X${Out:0:1}" != "X0" ]]; then
 		print "build cfs-server&cfs-client fail"
 		exit 1	
 	fi
 
-	mv ${RootPath}/chubaofs/build/bin ${RootPath}/
+	mv ${RootPath}/cubefs/build/bin ${RootPath}/
 	print "build cfs-server&cfs-client success"
 }
 

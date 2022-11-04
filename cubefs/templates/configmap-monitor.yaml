@@ -1,8 +1,8 @@
 {{- if .Values.component.monitor }}
 {{- $envAll := . }}
-{{- $consulURL := tuple $envAll | include "chubaofs.monitor.consul.url" }}
-{{- $consulAddress := tuple $envAll | include "chubaofs.monitor.consul.address" }}
-{{- $prometheusURL := tuple $envAll | include "chubaofs.monitor.prometheus.url" }}
+{{- $consulURL := tuple $envAll | include "cubefs.monitor.consul.url" }}
+{{- $consulAddress := tuple $envAll | include "cubefs.monitor.consul.address" }}
+{{- $prometheusURL := tuple $envAll | include "cubefs.monitor.prometheus.url" }}
 {{- $grafanaPassword := $envAll.Values.grafana.admin_password }}
 ---
 apiVersion: v1
@@ -16,8 +16,8 @@ data:
 {{ .Files.Get "config/grafana/init.sh" | indent 4 }}
   config.monitor: |+
 {{ .Files.Get "config/grafana/provisioning/config.monitor" | replace "GRAFANA_PASSWORD" $grafanaPassword | indent 4 }}
-  chubaofs.json: |+
-{{ .Files.Get "config/grafana/provisioning/dashboards/chubaofs.json" | indent 4 }}
+  cubefs.json: |+
+{{ .Files.Get "config/grafana/provisioning/dashboards/cubefs.json" | indent 4 }}
   dashboard.yml: |+
 {{ .Files.Get "config/grafana/provisioning/dashboards/dashboard.yml" | indent 4 }}
   datasource.yml: |+

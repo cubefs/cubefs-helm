@@ -30,7 +30,7 @@ spec:
 {{ toYaml . | indent 8 }}
       {{- end }}
       hostNetwork: true
-      priorityClassName: chubaofs-high-priority
+      priorityClassName: cubefs-high-priority
       hostPID: false
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
@@ -40,9 +40,9 @@ spec:
           command: [ "/bin/bash", "/cfs/bin/check-master-service.sh" ]
           env:
             - name: CBFS_MASTER_SERVICE_PORT
-              value: {{ include "chubaofs.master-service.with.port" . | quote }}
+              value: {{ include "cubefs.master-service.with.port" . | quote }}
           volumeMounts:
-            - name: chubaofs-bin
+            - name: cubefs-bin
               mountPath: /cfs/bin/check-master-service.sh
               subPath: check-master-service.sh
               readOnly: true
@@ -66,7 +66,7 @@ spec:
             - name: CBFS_DATANODE_LOG_LEVEL
               value: {{ .Values.datanode.log_level | quote }}
             - name: CBFS_MASTER_ADDRS
-              value: {{ include "chubaofs.master.address.array" . | quote }}
+              value: {{ include "cubefs.master.address.array" . | quote }}
             - name: CBFS_DATANODE_RAFT_HEARTBEAT_PORT
               value: {{ .Values.datanode.raft_heartbeat | quote }}
             - name: CBFS_DATANODE_RAFT_REPLICA_PORT
@@ -74,15 +74,15 @@ spec:
             - name: CBFS_DATANODE_EXPORTER_PORT
               value: {{ .Values.datanode.exporter_port | quote }}
             - name: CBFS_DATANODE_DISKS
-              value: {{ include "chubaofs.datanode.disks" . | quote }}
+              value: {{ include "cubefs.datanode.disks" . | quote }}
             - name: CBFS_CONSUL_ADDR
-              value: {{ tuple $envAll | include "chubaofs.monitor.consul.url" | quote }}
+              value: {{ tuple $envAll | include "cubefs.monitor.consul.url" | quote }}
           volumeMounts:
-            - name: chubaofs-bin
+            - name: cubefs-bin
               mountPath: /cfs/bin/config-datanode.sh
               subPath: config-datanode.sh
               readOnly: true
-            - name: chubaofs-conf
+            - name: cubefs-conf
               mountPath: /cfs/conf
             - name: cubefs-override
               mountPath: /cfs/conf-override
@@ -111,11 +111,11 @@ spec:
             tcpSocket:
               port: {{ .Values.datanode.port }}
           volumeMounts:
-            - name: chubaofs-bin
+            - name: cubefs-bin
               mountPath: /cfs/bin/start.sh
               subPath: start-datanode.sh
               readOnly: true
-            - name: chubaofs-conf
+            - name: cubefs-conf
               mountPath: /cfs/conf
             {{- if $.Values.path.log }}
             - name: pod-log-path
@@ -132,15 +132,15 @@ spec:
 {{- end }}
 {{ tuple $envAll $envAll.Values.datanode.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
       volumes:
-        - name: chubaofs-bin
+        - name: cubefs-bin
           configMap:
-            name: chubaofs-bin
+            name: cubefs-bin
             defaultMode: 0555
         - name: cubefs-override
           configMap:
             name: cubefs-config-override
             defaultMode: 0555
-        - name: chubaofs-conf
+        - name: cubefs-conf
           emptyDir: { }
         {{- if $.Values.path.log }}
         - name: pod-log-path

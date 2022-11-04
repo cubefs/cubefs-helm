@@ -2,46 +2,40 @@
 {{- $envAll := . }}
 
 ---
-kind: DaemonSet
+kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: cfs-csi-node
+  name: cfs-csi-controller
 spec:
-  updateStrategy:
-    type: OnDelete
   selector:
     matchLabels:
-      app: cfs-csi-node
+      app: cfs-csi-controller
+  replicas: 1
   template:
     metadata:
       labels:
-        app: cfs-csi-node
+        app: cfs-csi-controller
     spec:
       serviceAccount: cfs-csi-service-account
-      priorityClassName: chubaofs-high-priority
-      nodeSelector:
-        chubaofs-csi-node: enabled
+      priorityClassName: cubefs-high-priority
+      # nodeSelector:
+      #   cubefs-csi-controller: enabled
       containers:
-        - name: driver-registrar
-          image: {{ $.Values.image.driver_registrar }}
+        - name: external-provisioner
+          image: {{ $.Values.image.csi_provisioner }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
           args:
+            - --provisioner=$(DRIVER_NAME)
             - --csi-address=$(ADDRESS)
-            - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
           env:
             - name: TZ
               value: Asia/Shanghai
+            - name: DRIVER_NAME
+              value: {{ $.Values.provisioner.dirver_name }}
             - name: ADDRESS
-              value: /csi/csi.sock
-            - name: DRIVER_REG_SOCK_PATH
-              value: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.chubaofs.com/csi.sock
-            - name: KUBE_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
+              value: /csi/csi-controller.sock
           resources:
             requests:
               cpu: 200m
@@ -49,11 +43,28 @@ spec:
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - mountPath: /registration
-              name: registration-dir
+        - name: external-attacher
+          image: {{ $.Values.image.csi_attacher }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          securityContext:
+            privileged: true
+          args:
+            - --csi-address=$(ADDRESS)
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: ADDRESS
+              value: /csi/csi-controller.sock
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
         - name: cfs-driver
           image: {{ $.Values.image.csi_driver }}
-          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
           args:
@@ -69,7 +80,7 @@ spec:
             - name: LOG_LEVEL
               value: "5"
             - name: CSI_ENDPOINT
-              value: unix:///csi/csi.sock
+              value: unix:///csi/csi-controller.sock
             - name: DRIVER_NAME
               value: {{ $.Values.provisioner.dirver_name }}
             - name: KUBE_NODE_NAME
@@ -82,27 +93,23 @@ spec:
               exec:
                 command: [
                   "/bin/sh", "-c",
-                  "rm -rf /csi/csi.sock"
+                  "rm -rf /csi/csi-controller.sock"
                 ]
           resources:
             requests:
-              cpu: 1000m
-              memory: 2Gi
+              cpu: 200m
+              memory: 256Mi
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - mountPath: {{ $.Values.provisioner.kubelet_path -}}/pods
+            - mountPath: /var/lib/kubelet/pods
               mountPropagation: Bidirectional
               name: mountpoint-dir
       volumes:
         - hostPath:
-            path: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.chubaofs.com
+            path: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.cubefs.com
             type: DirectoryOrCreate
           name: socket-dir
-        - hostPath:
-            path: {{ $.Values.provisioner.kubelet_path -}}/plugins_registry
-            type: Directory
-          name: registration-dir
         - hostPath:
             path: {{ $.Values.provisioner.kubelet_path -}}/pods
             type: Directory
