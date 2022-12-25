@@ -14,11 +14,11 @@ kubernetes:
   version: ""
 
 image:
-  server: cubefs/cfs-server:2.4.0
-  client: cubefs/cfs-client:2.4.0
+  server: chubaofs/cfs-server:3.2.0
+  client: chubaofs/cfs-client:3.2.0
   csi_driver: cubefs/cfs-csi-driver:2.4.0.110.4
   csi_provisioner: quay.io/k8scsi/csi-provisioner:v1.6.0
-  driver_registrar: quay.io/k8scsi/csi-node-driver-registrar:v1.3.0
+  driver_registrar: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
   csi_attacher: quay.io/k8scsi/csi-attacher:v2.0.0
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
@@ -87,6 +87,11 @@ metanode:
     limits:
       memory: "256Gi"
       cpu: "8000m"
+  # Similar to datanode.config_override, all the config
+  # listed here will be merge into metanode config file.
+  config_override: |
+    {
+    }
 
 datanode:
   # NodeSelector for datanode daemonset
@@ -115,6 +120,23 @@ datanode:
     limits:
       memory: "32Gi"
       cpu: "8000m"
+  # Format: "${Node_IP}":${JSON_CONFIG}
+  # There's a demo server config 1.1.1.1 left for example,
+  # All the config written here will be merged to the final
+  # '/cfs/conf/datanode.json' file.
+  # Example:  {
+  #  "1.1.1.1": {
+  #   "logDir": "/data/cfs/log",
+  #   "disks": [
+  #    "/disk/nvme0n1:59000000000",
+  #    "/disk/nvme1n1:59000000000",
+  #    "/disk/nvme2n1:59000000000"
+  #   ]
+  #  }
+  # }
+  config_override: |
+    {
+    }
 
 objectnode:
   # The replicas of object component, object node is stateless,
