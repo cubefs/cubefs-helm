@@ -5,7 +5,7 @@ component:
   metanode: true
   objectnode: true
   client: true
-  provisioner: true
+  csi: true
   monitor: true
   ingress: true
 
@@ -16,10 +16,14 @@ kubernetes:
 image:
   server: chubaofs/cfs-server:3.2.0
   client: chubaofs/cfs-client:3.2.0
-  csi_driver: cubefs/cfs-csi-driver:2.4.0.110.4
-  csi_provisioner: quay.io/k8scsi/csi-provisioner:v1.6.0
+
+  # CSI related images
+  csi_driver: ghcr.io/cubefs/cfs-csi-driver:3.2.0.150.0
+  csi_provisioner: k8s.gcr.io/sig-storage/csi-provisioner:v2.2.2
+  csi_attacher: k8s.gcr.io/sig-storage/csi-attacher:v3.4.0
+  csi_resizer: k8s.gcr.io/sig-storage/csi-resizer:v1.3.0
   driver_registrar: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
-  csi_attacher: quay.io/k8scsi/csi-attacher:v2.0.0
+
   grafana: grafana/grafana:6.4.4
   prometheus: prom/prometheus:v2.13.1
   consul: consul:1.6.1
@@ -178,11 +182,67 @@ client:
       memory: "1024Mi"
       cpu: "1000m"
 
-provisioner:
-  dirver_name: csi.cubefs.com
-  log_level: error
-  kubelet_path: /var/lib/kubelet
-
+csi:
+  driverName: csi.cubefs.com
+  logLevel: error
+  # If you changed the default kubelet home path, this
+  # value needs to be modified accordingly
+  kubeletPath: /var/lib/kubelet
+  controller:
+    tolerations: [ ]
+    nodeSelector:
+      "component.cubefs.io/csi": "enabled"
+  node:
+    tolerations: [ ]
+    nodeSelector:
+      "component.cubefs.io/csi": "enabled"
+    resources:
+      enabled: false
+      requests:
+        memory: "4048Mi"
+        cpu: "2000m"
+      limits:
+        memory: "4048Mi"
+        cpu: "2000m"
+  storageClass:
+    # Whether automatically set this StorageClass to default volume provisioner
+    setToDefault: true
+    # StorageClass reclaim policy, 'Delete' or 'Retain' is supported
+    reclaimPolicy: "Delete"
+    # Override the master address parameter to connect to external cluster
+    masterAddr: ""
+    otherParameters:
+    # Other parameters that will pass through to StorageClass, and then
+    # will pass through to the generated cfs-client configuration file.
+    # crossZone: "false"
+    # enableToken: "false"
+    # zoneName: ""
+    # icacheTimeout: ""
+    # lookupValid: ""
+    # attrValid: ""
+    # readRate: ""
+    # writeRate: ""
+    # enSyncWrite: ""
+    # autoInvalData: ""
+    # rdonly: "false"
+    # writecache: "false"
+    # keepcache: "false"
+    # followerRead: "false"
+    # authenticate: "false"
+    # clientKey: ""
+    # ticketHost: ""
+    # enableHTTPS: "false"
+    # token: ""
+    # accessKey: ""
+    # secretKey: ""
+    # disableDcache: "false"
+    # subdir: ""
+    # fsyncOnClose: "true"
+    # maxcpus: ""
+    # enableXattr: "false"
+    # alignSize: "4096"
+    # maxExtentNumPerAlignArea: "12"
+    # forceAlignMerge: "true"
 
 consul:
   port: 8500
@@ -215,6 +275,3 @@ prometheus:
     limits:
       memory: "1024Mi"
       cpu: "1000m"
-
-storageClass:
-  default: false

@@ -1,4 +1,4 @@
-{{- if .Values.component.provisioner }}
+{{- if .Values.component.csi }}
 {{- $envAll := . }}
 
 ---
@@ -18,11 +18,17 @@ spec:
         app: cfs-csi-node
     spec:
       serviceAccount: cfs-csi-service-account
-      priorityClassName: cubefs-high-priority
+      serviceAccountName: cfs-csi-service-account
+    {{- with .Values.csi.node.nodeSelector }}
       nodeSelector:
-        cubefs-csi-node: enabled
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      {{- with .Values.csi.node.tolerations }}
+        tolerations:
+      {{ toYaml . | indent 8 }}
+    {{- end }}
       containers:
-        - name: driver-registrar
+        - name: csi-node-driver-registrar
           image: {{ $.Values.image.driver_registrar }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
@@ -36,7 +42,7 @@ spec:
             - name: ADDRESS
               value: /csi/csi.sock
             - name: DRIVER_REG_SOCK_PATH
-              value: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.cubefs.com/csi.sock
+              value: {{ $.Values.csi.kubeletPath -}}/plugins/{{- $.Values.csi.driverName -}}/csi.sock
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -71,7 +77,7 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
             - name: DRIVER_NAME
-              value: {{ $.Values.provisioner.dirver_name }}
+              value: {{ $.Values.csi.driverName }}
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -84,27 +90,24 @@ spec:
                   "/bin/sh", "-c",
                   "rm -rf /csi/csi.sock"
                 ]
-          resources:
-            requests:
-              cpu: 1000m
-              memory: 2Gi
+{{ tuple $envAll $envAll.Values.csi.node.resources | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
-            - mountPath: {{ $.Values.provisioner.kubelet_path -}}/pods
+            - mountPath: {{ $.Values.csi.kubeletPath }}/pods
               mountPropagation: Bidirectional
               name: mountpoint-dir
       volumes:
         - hostPath:
-            path: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.cubefs.com
+            path: {{ $.Values.csi.kubeletPath -}}/plugins/{{- $.Values.csi.driverName }}
             type: DirectoryOrCreate
           name: socket-dir
         - hostPath:
-            path: {{ $.Values.provisioner.kubelet_path -}}/plugins_registry
-            type: Directory
+            path: {{ $.Values.csi.kubeletPath -}}/plugins_registry
+            type: DirectoryOrCreate
           name: registration-dir
         - hostPath:
-            path: {{ $.Values.provisioner.kubelet_path -}}/pods
+            path: {{ $.Values.csi.kubeletPath -}}/pods
             type: Directory
           name: mountpoint-dir
 ---

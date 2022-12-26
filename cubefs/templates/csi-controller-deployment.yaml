@@ -1,4 +1,4 @@
-{{- if .Values.component.provisioner }}
+{{- if .Values.component.csi }}
 {{- $envAll := . }}
 
 ---
@@ -17,23 +17,29 @@ spec:
         app: cfs-csi-controller
     spec:
       serviceAccount: cfs-csi-service-account
+      serviceAccountName: cfs-csi-service-account
       priorityClassName: cubefs-high-priority
-      # nodeSelector:
-      #   cubefs-csi-controller: enabled
+    {{- with .Values.csi.controller.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      {{- with .Values.csi.controller.tolerations }}
+        tolerations:
+      {{ toYaml . | indent 8 }}
+    {{- end }}
       containers:
-        - name: external-provisioner
+        - name: csi-provisioner
           image: {{ $.Values.image.csi_provisioner }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
           args:
-            - --provisioner=$(DRIVER_NAME)
             - --csi-address=$(ADDRESS)
           env:
             - name: TZ
               value: Asia/Shanghai
             - name: DRIVER_NAME
-              value: {{ $.Values.provisioner.dirver_name }}
+              value: {{ $.Values.csi.driverName }}
             - name: ADDRESS
               value: /csi/csi-controller.sock
           resources:
@@ -45,6 +51,25 @@ spec:
               name: socket-dir
         - name: external-attacher
           image: {{ $.Values.image.csi_attacher }}
+          imagePullPolicy: {{ $.Values.image.pull_policy }}
+          securityContext:
+            privileged: true
+          args:
+            - --csi-address=$(ADDRESS)
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: ADDRESS
+              value: /csi/csi-controller.sock
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+        - name: csi-resizer
+          image: {{ $.Values.image.csi_resizer }}
           imagePullPolicy: {{ $.Values.image.pull_policy }}
           securityContext:
             privileged: true
@@ -82,7 +107,7 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi-controller.sock
             - name: DRIVER_NAME
-              value: {{ $.Values.provisioner.dirver_name }}
+              value: {{ $.Values.csi.driverName }}
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -107,11 +132,11 @@ spec:
               name: mountpoint-dir
       volumes:
         - hostPath:
-            path: {{ $.Values.provisioner.kubelet_path -}}/plugins/csi.cubefs.com
+            path: {{ $.Values.csi.kubeletPath -}}/plugins/csi.cubefs.com
             type: DirectoryOrCreate
           name: socket-dir
         - hostPath:
-            path: {{ $.Values.provisioner.kubelet_path -}}/pods
+            path: {{ $.Values.csi.kubeletPath -}}/pods
             type: Directory
           name: mountpoint-dir
 ---

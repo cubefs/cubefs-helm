@@ -1,4 +1,4 @@
-{{- if .Values.component.provisioner }}
+{{- if .Values.component.csi }}
 {{- $envAll := . }}
 
 ---
