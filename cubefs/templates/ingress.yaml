@@ -13,25 +13,32 @@ metadata:
 spec:
   rules:
 {{- if semverCompare "<1.19.0" (include "cubefs.kubernetes.version" .) }}
+  {{- if .Values.component.master }}
     - host: {{ .Values.master.host }}
       http:
         paths:
           - backend:
               serviceName: master-service
               servicePort: {{ .Values.master.port }}
+  {{- end }}
+  {{- if .Values.component.monitor }}
     - host: {{ .Values.grafana.host }}
       http:
         paths:
           - backend:
               serviceName: grafana-service
               servicePort: {{ .Values.grafana.port }}
+  {{- end }}
+  {{- if .Values.component.objectnode }}
     - host: {{ .Values.objectnode.host }}
       http:
         paths:
           - backend:
               serviceName: objectnode-service
               servicePort: {{ .Values.objectnode.port }}
+  {{- end }}
 {{- else }}
+  {{- if .Values.component.master }}
     - host: {{ .Values.master.host }}
       http:
         paths:
@@ -42,6 +49,8 @@ spec:
                   number: {{ .Values.master.port }}
             path: /
             pathType: Prefix
+  {{- end }}
+  {{- if .Values.component.monitor }}
     - host: {{ .Values.grafana.host }}
       http:
         paths:
@@ -52,6 +61,8 @@ spec:
                   number: {{ .Values.grafana.port }}
             path: /
             pathType: Prefix
+  {{- end }}
+  {{- if .Values.component.objectnode }}
     - host: {{ .Values.objectnode.host }}
       http:
         paths:
@@ -62,5 +73,6 @@ spec:
                   number: {{ .Values.objectnode.port }}
             path: /
             pathType: Prefix
+  {{- end }}
 {{- end }}
 {{ end }}
