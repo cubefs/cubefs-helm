@@ -83,7 +83,7 @@ kubectl label node <nodename> component.cubefs.io/master=enabled
 kubectl label node <nodename> component.cubefs.io/metanode=enabled
 kubectl label node <nodename> component.cubefs.io/datanode=enabled
 kubectl label node <nodename> component.cubefs.io/objectnode=enabled
-kubectl label node <nodename> cubefs-csi-node=enabled
+kubectl label node <nodename> component.cubefs.io/csi=enabled
 ```
 
 ### Deploy Cubefs cluster
