@@ -1,0 +1,97 @@
+{{- if .Values.component.blobstore_scheduler }}
+{{- $envAll := . }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: scheduler
+  labels:
+    app.kubernetes.io/name: cubefs
+    app.kubernetes.io/component: blobstore-scheduler
+
+spec:
+  updateStrategy:
+    type: OnDelete
+  replicas: 2
+  serviceName: scheduler-service
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cubefs
+      app.kubernetes.io/component: blobstore-scheduler
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cubefs
+        app.kubernetes.io/component: blobstore-scheduler
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.blobstore_scheduler.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      {{- with .Values.blobstore_scheduler.tolerations }}
+          tolerations:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      initContainers:
+        - name: init-check
+          image: {{ $.Values.image.blobstore }}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "/cfs/bin/check_clustermgr.sh" ]
+          env:
+            - name: CLUSTERMGR_SERVICE
+              value: clustermgr-0.clustermgr-service{{ $.Values.blobstore_clustermgr.bind_addr }}
+      containers:
+        - name: scheduler
+          image: {{ $.Values.image.blobstore }}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "/cfs/bin/start_scheduler.sh" ]
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CLUSTERMGR_REPLICAS
+              value: {{ $.Values.blobstore_clustermgr.replicas | quote }}
+            - name: CLUSTERMGR_BIND_ADDR
+              value: {{ $.Values.blobstore_clustermgr.bind_addr | quote }}
+            - name: SCHEDULER_REPLICAS
+              value: {{ $.Values.blobstore_scheduler.replicas | quote }}
+            - name: BIND_ADDR
+              value: {{ $.Values.blobstore_scheduler.bind_addr | quote }}
+            - name: CLUSTER_ID
+              value: {{ $.Values.blobstore_scheduler.cluster_id | quote }}
+            - name: IDC
+              value: {{ $.Values.blobstore_scheduler.idc | quote }}
+            - name: LOG_LEVEL
+              value: {{ $.Values.blobstore_scheduler.log_level | quote }}
+            - name: KAFKA_ADDRS
+              value: {{ $.Values.blobstore_scheduler.kafka_addrs | quote }}
+          ports:
+            - name: port1
+              containerPort: {{ $.Values.blobstore_scheduler.port }}
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - /cfs/bin/check_scheduler_alive.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: log
+              mountPath: /cfs/log
+      volumes:
+        - name: log
+          hostPath:
+            path: {{ $.Values.blobstore_scheduler.log_path | quote }}
+            type: DirectoryOrCreate
+{{ end }}
