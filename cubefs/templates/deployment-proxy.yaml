@@ -1,0 +1,101 @@
+{{- if .Values.component.blobstore_proxy }}
+{{- $envAll := . }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+  labels:
+    app.kubernetes.io/name: cubefs
+    app.kubernetes.io/component: blobstore-proxy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cubefs
+      app.kubernetes.io/component: blobstore-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cubefs
+        app.kubernetes.io/component: blobstore-proxy
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.blobstore_proxy.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      {{- with .Values.blobstore_proxy.tolerations }}
+          tolerations:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      initContainers:
+        - name: init-check
+          image: {{ $.Values.image.blobstore }}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "/cfs/bin/check_clustermgr.sh" ]
+          env:
+            - name: CLUSTERMGR_SERVICE
+              value: clustermgr-0.clustermgr-service{{ $.Values.blobstore_clustermgr.bind_addr }}
+      containers:
+        - name: proxy
+          image: {{ $.Values.image.blobstore }}
+          imagePullPolicy: 
+          command: [ "/bin/bash", "/cfs/bin/start_proxy.sh" ]
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CLUSTERMGR_REPLICAS
+              value: {{ $.Values.blobstore_clustermgr.replicas | quote }}
+            - name: CLUSTERMGR_BIND_ADDR
+              value: {{ $.Values.blobstore_clustermgr.bind_addr | quote }}
+            - name: BIND_ADDR
+              value: {{ $.Values.blobstore_proxy.bind_addr | quote }}
+            - name: CLUSTER_ID
+              value: {{ $.Values.blobstore_proxy.cluster_id | quote }}
+            - name: ALLOC_VOLS_NUM
+              value: {{ $.Values.blobstore_proxy.alloc_vols_num | quote }}
+            - name: HB_INTERVAL
+              value: {{ $.Values.blobstore_proxy.hb_interval | quote }}
+            - name: IDC
+              value: {{ $.Values.blobstore_proxy.idc | quote }}
+            - name: LOG_LEVEL
+              value: {{ $.Values.blobstore_proxy.log_level | quote }}
+            - name: KAFKA_ADDRS
+              value: {{ $.Values.blobstore_proxy.kafka_addrs | quote }}
+          ports:
+            - name: port
+              containerPort: {{ $.Values.blobstore_proxy.port }}
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - /cfs/bin/check_proxy_alive.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: cache
+              mountPath: /cfs/data/proxycache
+            - name: log
+              mountPath: /cfs/log
+      volumes:
+        - name: cache
+          hostPath:
+            path: {{ $.Values.blobstore_proxy.cache_path | quote }}
+            type: DirectoryOrCreate
+        - name: log
+          hostPath:
+            path: {{ $.Values.blobstore_proxy.log_path | quote }}
+            type: DirectoryOrCreate
+{{ end }}

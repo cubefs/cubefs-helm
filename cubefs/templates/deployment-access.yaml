@@ -1,0 +1,91 @@
+{{- if .Values.component.blobstore_access }}
+{{- $envAll := . }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: access
+  labels:
+    app.kubernetes.io/name: cubefs
+    app.kubernetes.io/component: blobstore-access
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cubefs
+      app.kubernetes.io/component: blobstore-access
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cubefs
+        app.kubernetes.io/component: blobstore-access
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.blobstore_access.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      {{- with .Values.blobstore_access.tolerations }}
+          tolerations:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      initContainers:
+        - name: init-check
+          image: {{ $.Values.image.blobstore }}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "/cfs/bin/check_clustermgr.sh" ]
+          env:
+            - name: CLUSTERMGR_SERVICE
+              value: clustermgr-0.clustermgr-service{{ $.Values.blobstore_clustermgr.bind_addr }}
+      containers:
+        - name: access
+          image: {{ $.Values.image.blobstore }}
+          imagePullPolicy: 
+          command: [ "/bin/bash", "/cfs/bin/start_access.sh" ]
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CLUSTERMGR_REPLICAS
+              value: {{ $.Values.blobstore_clustermgr.replicas | quote }}
+            - name: CLUSTERMGR_BIND_ADDR
+              value: {{ $.Values.blobstore_clustermgr.bind_addr | quote }}
+            - name: BIND_ADDR
+              value: {{ $.Values.blobstore_access.bind_addr | quote }}
+            - name: CLUSTER_ID
+              value: {{ $.Values.blobstore_access.cluster_id | quote }}
+            - name: IDC
+              value: {{ $.Values.blobstore_access.idc | quote }}
+            - name: REGION
+              value: {{ $.Values.blobstore_access.region | quote }}
+            - name: LOG_LEVEL
+              value: {{ $.Values.blobstore_access.log_level | quote }}
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - /cfs/bin/check_access_alive.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          ports:
+            - name: port
+              containerPort: {{ $.Values.blobstore_access.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: log
+              mountPath: /cfs/log
+      volumes:
+        - name: log
+          hostPath:
+            path: {{ $.Values.blobstore_access.log_path | quote }}
+            type: DirectoryOrCreate
+{{ end }}

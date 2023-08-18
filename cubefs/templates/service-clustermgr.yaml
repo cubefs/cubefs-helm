@@ -1,0 +1,22 @@
+{{- if .Values.component.blobstore_clustermgr }}
+{{- $envAll := . }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clustermgr-service
+spec:
+  ports:
+  - port: {{ $.Values.blobstore_clustermgr.port }}
+    protocol: TCP
+    targetPort: {{ $.Values.blobstore_clustermgr.port }}
+    name: cm-port
+  - port: {{ $.Values.blobstore_clustermgr.raft_port }}
+    protocol: TCP
+    targetPort: {{ $.Values.blobstore_clustermgr.raft_port }}
+    name: raft-port
+  selector:
+    app.kubernetes.io/component: blobstore-clustermgr
+    app.kubernetes.io/name: cubefs
+{{ end }}

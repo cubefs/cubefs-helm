@@ -122,3 +122,40 @@ resources:
 {{- define "cubefs.kubernetes.version" -}}
   {{- default .Capabilities.KubeVersion.Version .Values.kubernetes.version -}}
 {{- end -}}
+
+{{/* Support override kubernetes version */}}
+{{- define "cubefs.kubernetes.version" -}}
+  {{- default .Capabilities.KubeVersion.Version .Values.kubernetes.version -}}
+{{- end -}}
+
+{{- define "helm-toolkit.utils.blobstore_blobnode.disks.envs" -}}
+{{- $envAll := index . 0 -}}
+{{- $disk := index . 1 -}}
+{{- $diskAndQuotaArray := split ":" $disk -}}
+{{- if hasPrefix "/" $diskAndQuotaArray._0  -}}
+- name: DISK_DEVICE_{{ $diskAndQuotaArray._0 | replace "/" "" | replace "-" "" }}
+  value: {{ $diskAndQuotaArray._1 }}
+{{- end -}}
+{{- end -}}
+
+{{- define "helm-toolkit.utils.blobstore_blobnode.disks.volumes" -}}
+{{- $envAll := index . 0 -}}
+{{- $disk := index . 1 -}}
+{{- $diskAndQuotaArray := split ":" $disk -}}
+{{- if hasPrefix "/" $diskAndQuotaArray._0  -}}
+- name: {{ $diskAndQuotaArray._0 | replace "/" "" }}
+  hostPath:
+    path: {{ $diskAndQuotaArray._0 }}
+    type: DirectoryOrCreate
+{{- end -}}
+{{- end -}}
+
+{{- define "helm-toolkit.utils.blobstore_blobnode.disks.volumes_mount" -}}
+{{- $envAll := index . 0 -}}
+{{- $disk := index . 1 -}}
+{{- $diskAndQuotaArray := split ":" $disk -}}
+{{- if hasPrefix "/" $diskAndQuotaArray._0  -}}
+- name: {{ $diskAndQuotaArray._0 | replace "/" "" }}
+  mountPath: {{ $diskAndQuotaArray._1 }}
+{{- end }}
+{{- end }}

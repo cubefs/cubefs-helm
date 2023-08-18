@@ -8,14 +8,20 @@ component:
   csi: true
   monitor: true
   ingress: true
+  blobstore_clustermgr: false
+  blobstore_blobnode: false
+  blobstore_proxy: false
+  blobstore_scheduler: false
+  blobstore_access: false
 
 # Allow to override kubernetes version
 kubernetes:
   version: ""
 
 image:
-  server: chubaofs/cfs-server:3.2.0
-  client: chubaofs/cfs-client:3.2.0
+  server: cubefs/cfs-server:3.2.0
+  client: cubefs/cfs-client:3.2.0
+  blobstore: cubefs/blobstore:3.3.0
 
   # CSI related images
   csi_driver: ghcr.io/cubefs/cfs-csi-driver:3.2.0.150.0
@@ -275,3 +281,87 @@ prometheus:
     limits:
       memory: "1024Mi"
       cpu: "1000m"
+
+blobstore_clustermgr:
+  replicas: 3
+  port: 9998
+  nodeSelector:
+    "component.cubefs.io/clustermgr": "enabled"
+  tolerations: [ ]
+  bind_addr: ":9998"
+  cluster_id: "1"
+  idc: '["z0"]'
+  chunk_size: "16777216"
+  log_level: "info"
+  enable_auth: "false"
+  auth_secret: "test-secret"
+  region: "test-region"
+  code_policies: '[{"mode_name":"EC3P3","min_size":0,"max_size":5368709120,"size_ratio":1,"enable":true}]'
+  raft_port: 10110
+  alloc_size: "1048576"
+  raft_snapshot_num: "64"
+  raft_flush_num: "10000"
+  raft_flush_interval: "10"
+  raft_trunc_num: "10"
+  disk_refresh_interval: "10"
+  disk_rack_aware: "false"
+  disk_host_aware: "false"
+  db_path: "/var/lib/blobstore-clustermgr-db"
+  wal_path: "/var/lib/blobstore-clustermgr-wal"
+  log_path: "/var/log/blobstore-clustermgr"
+  
+blobstore_blobnode:
+  port: 8899
+  bind_addr: ":8899"
+  nodeSelector:
+    "component.cubefs.io/blobnode": "enabled"
+  tolerations: [ ]
+  cluster_id: "1"
+  idc: "z0"
+  rack: "testrack"
+  log_level: "info"
+  disk_reserved: "1"
+  compact_reserved: "1"
+  log_path: "/var/log/blobstore-blobnode"
+  disks:
+    - /var/log/blobstore-blobnode-disk1:/cfs/data/disk1
+
+blobstore_proxy:
+  port: 9600
+  bind_addr: ":9600"
+  nodeSelector:
+    "component.cubefs.io/proxy": "enabled"
+  tolerations: [ ]
+  cluster_id: "1"
+  idc: "z0"
+  log_level: "info"
+  alloc_vols_num: 2
+  hb_interval: 3
+  kafka_addrs: "kafka-service:9092"
+  cache_path: "/var/lib/blobstore-proxy-cache"
+  log_path: "/var/log/blobstore-proxy"
+
+blobstore_scheduler:
+  replicas: 2
+  port: 9800
+  bind_addr: ":9800"
+  nodeSelector:
+    "component.cubefs.io/scheduler": "enabled"
+  tolerations: [ ]
+  cluster_id: "1"
+  idc: "z0"
+  log_level: "info"
+  kafka_addrs: "kafka-service:9092"
+  log_path: "/var/log/blobstore-scheduler"
+
+blobstore_access:
+  port: 9500
+  bind_addr: ":9500"
+  nodeSelector:
+    "component.cubefs.io/access": "enabled"
+  tolerations: [ ]
+  cluster_id: "1"
+  idc: "z0"
+  region: "test-region"
+  log_level: "info"
+  log_path: "/var/log/blobstore-access"

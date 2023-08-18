@@ -1,0 +1,126 @@
+{{- if .Values.component.blobstore_clustermgr }}
+{{- $envAll := . }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clustermgr
+  labels:
+    app.kubernetes.io/name: cubefs
+    app.kubernetes.io/component: blobstore-clustermgr
+
+spec:
+  updateStrategy:
+    type: OnDelete
+  replicas: {{ .Values.blobstore_clustermgr.replicas }}
+  serviceName: clustermgr-service
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cubefs
+      app.kubernetes.io/component: blobstore-clustermgr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cubefs
+        app.kubernetes.io/component: blobstore-clustermgr
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+          {{- with .Values.blobstore_clustermgr.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      {{- with .Values.blobstore_clustermgr.tolerations }}
+          tolerations:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      containers:
+        - name: clustermgr
+          image: {{ $.Values.image.blobstore }}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "/cfs/bin/start_clustermgr.sh" ]
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CLUSTERMGR_REPLICAS
+              value: {{ $.Values.blobstore_clustermgr.replicas | quote }}
+            - name: BIND_ADDR
+              value: {{ $.Values.blobstore_clustermgr.bind_addr | quote }}
+            - name: CLUSTER_ID
+              value: {{ $.Values.blobstore_clustermgr.cluster_id | quote }}
+            - name: IDC
+              value: {{ $.Values.blobstore_clustermgr.idc | quote }}
+            - name: CHUNK_SIZE
+              value: {{ $.Values.blobstore_clustermgr.chunk_size | quote }}
+            - name: LOG_LEVEL
+              value: {{ $.Values.blobstore_clustermgr.log_level | quote }}
+            - name: ENABLE_AUTH
+              value: {{ $.Values.blobstore_clustermgr.enable_auth | quote }}
+            - name: AUTH_SECRET
+              value: {{ $.Values.blobstore_clustermgr.auth_secret | quote }}
+            - name: REGION
+              value: {{ $.Values.blobstore_clustermgr.region | quote }}
+            - name: CODE_POLICIES
+              value: {{ $.Values.blobstore_clustermgr.code_policies | quote }}
+            - name: LISTEN_PORT
+              value: {{ $.Values.blobstore_clustermgr.raft_port | quote }}
+            - name: ALLOC_SIZE
+              value: {{ $.Values.blobstore_clustermgr.alloc_size | quote }}
+            - name: RAFT_SNAPSHOT_NUM
+              value: {{ $.Values.blobstore_clustermgr.raft_snapshot_num | quote }}
+            - name: RAFT_FLUSH_NUM
+              value: {{ $.Values.blobstore_clustermgr.raft_flush_num | quote }}
+            - name: RAFT_FLUSH_INTERVAL
+              value: {{ $.Values.blobstore_clustermgr.raft_flush_interval | quote }}
+            - name: RAFT_TRUNC_NUM
+              value: {{ $.Values.blobstore_clustermgr.raft_trunc_num | quote }}
+            - name: DISK_REFRESH_INTERVAL
+              value: {{ $.Values.blobstore_clustermgr.disk_refresh_interval | quote }}
+            - name: DISK_RACK_AWARE
+              value: {{ $.Values.blobstore_clustermgr.disk_rack_aware | quote }}
+            - name: DISK_HOST_AWARE
+              value: {{ $.Values.blobstore_clustermgr.disk_host_aware | quote }}
+          ports:
+            - name: raft-port
+              containerPort: {{ $.Values.blobstore_clustermgr.raft_port }}
+              protocol: TCP
+            - name: cm-port
+              containerPort: {{ $.Values.blobstore_clustermgr.port }}
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - /cfs/bin/check_clustermgr_alive.sh
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: db
+              mountPath: /cfs/data/clustermgr/db
+            - name: wal
+              mountPath: /cfs/data/clustermgr/raftwal
+            - name: log
+              mountPath: /cfs/log
+      volumes:
+        - name: db
+          hostPath:
+            path: {{ $.Values.blobstore_clustermgr.db_path | quote}}
+            type: DirectoryOrCreate
+        - name: wal
+          hostPath:
+            path: {{ $.Values.blobstore_clustermgr.wal_path | quote}}
+            type: DirectoryOrCreate
+        - name: log
+          hostPath:
+            path: {{ $.Values.blobstore_clustermgr.log_path | quote}}
+            type: DirectoryOrCreate
+{{ end }}
