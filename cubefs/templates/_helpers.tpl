@@ -117,12 +117,6 @@ resources:
 {{- end }}
 {{- end }}
 
-
-{{/* Support override kubernetes version */}}
-{{- define "cubefs.kubernetes.version" -}}
-  {{- default .Capabilities.KubeVersion.Version .Values.kubernetes.version -}}
-{{- end -}}
-
 {{/* Support override kubernetes version */}}
 {{- define "cubefs.kubernetes.version" -}}
   {{- default .Capabilities.KubeVersion.Version .Values.kubernetes.version -}}
