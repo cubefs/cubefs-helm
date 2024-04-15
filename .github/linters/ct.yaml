@@ -1,0 +1,10 @@
+# See https://github.com/helm/chart-testing#configuration
+remote: origin
+target-branch: master
+chart-dirs:
+  - cubefs
+chart-repos:
+  - cubefs-community=https://cubefs.github.io/cubefs-helm
+helm-extra-args: --timeout 600s
+additional-commands:
+  - helm unittest --helm3 --strict --file unittests/*.yaml --file 'unittests/**/*.yaml' {{ .Path }}

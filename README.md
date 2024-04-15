@@ -1,37 +1,36 @@
-
 # cubefs-helm
 
 ## Deploy Cubefs using Kubernetes and Helm
 
 The cubefs-helm project helps deploy a Cubefs cluster orchestrated by Kubernetes.
 
-**Cubefs Components**
+## Cubefs Components
 
-<div width="100%" style="text-align:center;"><img alt="Cubefs Components" src="assets/cubefs-component.jpg" width="700"/></div>
+![Cubefs Components](assets/cubefs-component.jpg)
 
+## Cubefs Deployment
 
-**Cubefs Deployment**
+![Cubefs Deployment](assets/cubefs-deployment.jpg)
 
-<div width="100%" style="text-align:center;"><img alt="Cubefs Deployment" src="assets/cubefs-deployment.jpg" width="700"/></div>
+### Prerequisite
 
-### Prerequisite 
-- Kubernetes 1.14+
-- CSI spec version 1.1.0
-- Helm 3
+* Kubernetes 1.14+
+* CSI spec version 1.1.0
+* Helm 3
 
 ### Download cubefs-helm
 
-```
-$ git clone https://github.com/cubefs/cubefs-helm
-$ cd cubefs-helm
+```shell
+git clone https://github.com/cubefs/cubefs-helm
+cd cubefs-helm
 ```
 
 ### Create configuration yaml file
 
 Create a `cubefs.yaml` file, and put it in a user-defined path. Suppose this is where we put it.
 
-```
-$ vi ~/cubefs.yaml 
+```shell
+vim ~/cubefs.yaml 
 ```
 
 ``` yaml
@@ -78,7 +77,7 @@ provisioner:
 
 You should tag each Kubernetes node with the appropriate labels accorindly for server node and CSI node of Cubefs.
 
-```
+```shell
 kubectl label node <nodename> component.cubefs.io/master=enabled
 kubectl label node <nodename> component.cubefs.io/metanode=enabled
 kubectl label node <nodename> component.cubefs.io/datanode=enabled
@@ -87,16 +86,17 @@ kubectl label node <nodename> component.cubefs.io/csi=enabled
 ```
 
 ### Deploy Cubefs cluster
-```
-$ helm upgrade --install cubefs ./cubefs -f ~/cubefs.yaml -n cubefs --create-namespace
+
+```shell
+helm upgrade --install cubefs  -f ~/cubefs.yaml -n cubefs --create-namespace cubefs
 ```
 
 The output of `helm install` shows servers to be deployed.
 
 Use the following command to check pod status, which may take a few minutes.
 
-```
-$ kubectl -n cubefs get pods
+```shell
+kubectl -n cubefs get pods
 NAME                         READY   STATUS    RESTARTS   AGE
 cfs-csi-controller-cfc7754b-ptvlq   3/3     Running   0          2m40s
 cfs-csi-node-q262p                  2/2     Running   0          2m40s
@@ -121,7 +121,7 @@ prometheus-6dcf97d7b-5v2xw          1/1     Running   0          2m40s
 
 Check cluster status
 
-```
+```shell
 helm status cubefs
 ```
 
@@ -147,8 +147,8 @@ spec:
   storageClassName: cfs-sc
 ```
 
-```
-$ kubectl create -f pvc.yaml
+```shell
+kubectl create -f pvc.yaml
 ```
 
 There is an example `deployment.yaml` using the PVC as below
@@ -186,8 +186,8 @@ spec:
             claimName: cfs-pvc
 ```
 
-```
-$ kubectl create -f deployment.yaml
+```shell
+kubectl create -f deployment.yaml
 ```
 
 ## Config Monitoring System (optional)
@@ -208,37 +208,37 @@ spec:
 
 Start the ingress controller
 
-```
-$ kubectl apply -f mandatory.yaml
+```shell
+kubectl apply -f mandatory.yaml
 ```
 
 Get the IP address of Nginx ingress controller.
 
-```
-$ kubectl get pods --all-namespaces -o wide | grep nginx-ingress-controller
+```shell
+kubectl get pods --all-namespaces -o wide | grep nginx-ingress-controller
 ingress-nginx   nginx-ingress-controller-5bbd46cd86-q88sw    1/1     Running   0          115m   10.196.31.101   host-10-196-31-101   <none>           <none>
 ```
 
 Get the host name of Grafana which should also be used as domain name.
 
-```
-$ kubectl get ingress -n cubefs
+```shell
+kubectl get ingress -n cubefs
 NAME      HOSTS                  ADDRESS         PORTS   AGE
 grafana   monitor.cubefs.com   10.106.207.55   80      24h
 ```
 
 Add a local DNS in `/etc/hosts` in order for a request to find the ingress controller.
 
-```
+```yaml
 10.196.31.101 monitor.cubefs.com
 ```
 
 At this point, dashboard can be visited by `http://monitor.cubefs.com`.
 
-## Uninstall Cubefs 
+## Uninstall Cubefs
 
 uninstall Cubefs cluster using helm
 
-```
+```shell
 helm delete cubefs
 ```
