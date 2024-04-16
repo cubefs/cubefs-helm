@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -28,7 +28,7 @@ jobs:
         run: |
           changed=$(ct list-changed --config .github/linters/ct.yaml)
           if [[ -n "$changed" ]]; then
-            echo "name=changed::true" >> "$GITHUB_OUTPUT"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: install helm unittest plugin
