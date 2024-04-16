@@ -1,0 +1,29 @@
+name: Sync CODEOWNERS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          ./scripts/check-codeowners.sh > ${{ runner.temp }}/CODEOWNERS
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: master
+      - name: install yq
+        run: |
+          sudo snap install yq
+      - name: commit codeowners
+        run: |
+          cp -f ${{ runner.temp }}/CODEOWNERS .github/CODEOWNERS
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add .github/CODEOWNERS
+          git commit --signoff -m "change code owners"
+          git push
