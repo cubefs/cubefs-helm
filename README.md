@@ -4,6 +4,11 @@
 
 The cubefs-helm project helps deploy a Cubefs cluster orchestrated by Kubernetes.
 
+## Governance
+* CubeFS-helm is a sub-project of the CubeFS main project, complying with the rules of CubeFS main projects.
+* CubeFS-helm does not have independent leadership, adopting the same leadership strategy as the CubeFS main project.
+* Contributions to CubeFS-helm are equivalent to contributions to the main project and can be used as a basis for community role promotion.
+
 ## Cubefs Components
 
 ![Cubefs Components](assets/cubefs-component.jpg)
