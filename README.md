@@ -23,13 +23,6 @@ The cubefs-helm project helps deploy a Cubefs cluster orchestrated by Kubernetes
 * CSI spec version 1.1.0
 * Helm 3
 
-### Download cubefs-helm
-
-```shell
-git clone https://github.com/cubefs/cubefs-helm
-cd cubefs-helm
-```
-
 ### Create configuration yaml file
 
 Create a `cubefs.yaml` file, and put it in a user-defined path. Suppose this is where we put it.
@@ -90,7 +83,22 @@ kubectl label node <nodename> component.cubefs.io/objectnode=enabled
 kubectl label node <nodename> component.cubefs.io/csi=enabled
 ```
 
-### Deploy Cubefs cluster
+### Local Deploy Cubefs cluster
+
+```shell
+git clone https://github.com/cubefs/cubefs-helm
+cd cubefs-helm
+```
+
+```shell
+helm upgrade --install cubefs ./cubefs -f ~/cubefs.yaml -n cubefs --create-namespace
+```
+
+### Remote Deploy Cubefs cluster
+
+```shell
+helm repo add cubefs https://cubefs.github.io/cubefs-helm
+```
 
 ```shell
 helm upgrade --install cubefs  -f ~/cubefs.yaml -n cubefs --create-namespace cubefs
