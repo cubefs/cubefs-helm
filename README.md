@@ -39,7 +39,7 @@ vim ~/cubefs.yaml
 ```
 
 ``` yaml
-# Select which component to install
+# Select which component to install (by default, everything except blobstore is enabled)
 component:
   master: true
   datanode: true
@@ -66,13 +66,12 @@ datanode:
     - /data0:21474836480
     - /data1:21474836480
 
+# by default resources.enabled is true, with resources.requests and requests.limits
+# set to request 32Gi and limit to 256Gi - adjust these down if required
 metanode:
   # Total memory metanode can use, recommended to be configured
   # as 80% of physical machine memory
   total_mem: "26843545600"
-
-provisioner:
-  kubelet_path: /var/lib/kubelet
 ```
 
 > Note that `cubefs/values.yaml` shows all the config parameters of Cubefs.
